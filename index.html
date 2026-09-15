@@ -20,39 +20,11 @@
   <div id="app"></div>
 
   <script>
-    // ============ STORAGE ============
-    const STORAGE_KEYS = {
-      USER: 'ltp_user',
-      TASKS: 'ltp_tasks',
-      HABITS: 'ltp_habits',
-      HABIT_LOGS: 'ltp_habit_logs',
-      DIET: 'ltp_diet',
-      GOALS: 'ltp_goals'
-    };
+    const STORAGE_KEYS = { USER: 'ltp_user', TASKS: 'ltp_tasks', HABITS: 'ltp_habits', HABIT_LOGS: 'ltp_habit_logs', DIET: 'ltp_diet', GOALS: 'ltp_goals' };
+    const Storage = { get(key) { const data = localStorage.getItem(key); return data ? JSON.parse(data) : null; }, set(key, value) { localStorage.setItem(key, JSON.stringify(value)); }, getArray(key) { const data = this.get(key); return data || []; } };
+    function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
+    function getToday() { return new Date().toISOString().split('T')[0]; }
 
-    const Storage = {
-      get(key) {
-        const data = localStorage.getItem(key);
-        return data ? JSON.parse(data) : null;
-      },
-      set(key, value) {
-        localStorage.setItem(key, JSON.stringify(value));
-      },
-      getArray(key) {
-        const data = this.get(key);
-        return data || [];
-      }
-    };
-
-    function generateId() {
-      return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    }
-
-    function getToday() {
-      return new Date().toISOString().split('T')[0];
-    }
-
-    // ============ CATEGORIES & PRESETS ============
     const TASK_CATEGORIES = [
       { value: 'work', label: 'Work', icon: '💼', color: 'bg-blue-100 text-blue-700' },
       { value: 'personal', label: 'Personal', icon: '🏠', color: 'bg-purple-100 text-purple-700' },
@@ -65,22 +37,14 @@
       { value: 'social', label: 'Social', icon: '👥', color: 'bg-cyan-100 text-cyan-700' },
       { value: 'errands', label: 'Errands', icon: '📝', color: 'bg-gray-100 text-gray-700' }
     ];
-
     const HABIT_PRESETS = [
-      { name: 'Morning Exercise', emoji: '🏃', color: '#f59e0b' },
-      { name: 'Read 30 Minutes', emoji: '📖', color: '#3b82f6' },
-      { name: 'Drink 8 Glasses Water', emoji: '💧', color: '#06b6d4' },
-      { name: 'Meditate 10 Minutes', emoji: '🧘', color: '#8b5cf6' },
-      { name: 'No Social Media', emoji: '📵', color: '#ef4444' },
-      { name: 'Sleep Before 11 PM', emoji: '😴', color: '#6366f1' },
-      { name: 'Eat Healthy Breakfast', emoji: '🥗', color: '#10b981' },
-      { name: 'Learn New Skill', emoji: '🧠', color: '#ec4899' },
-      { name: 'Practice Gratitude', emoji: '🙏', color: '#84cc16' },
-      { name: 'Stretch for 15 Minutes', emoji: '🤸', color: '#f97316' },
-      { name: 'Write in Journal', emoji: '✍️', color: '#14b8a6' },
-      { name: 'Take Vitamins', emoji: '💊', color: '#a855f7' }
+      { name: 'Morning Exercise', emoji: '🏃', color: '#f59e0b' }, { name: 'Read 30 Minutes', emoji: '📖', color: '#3b82f6' },
+      { name: 'Drink 8 Glasses Water', emoji: '💧', color: '#06b6d4' }, { name: 'Meditate 10 Minutes', emoji: '🧘', color: '#8b5cf6' },
+      { name: 'No Social Media', emoji: '📵', color: '#ef4444' }, { name: 'Sleep Before 11 PM', emoji: '😴', color: '#6366f1' },
+      { name: 'Eat Healthy Breakfast', emoji: '🥗', color: '#10b981' }, { name: 'Learn New Skill', emoji: '🧠', color: '#ec4899' },
+      { name: 'Practice Gratitude', emoji: '🙏', color: '#84cc16' }, { name: 'Stretch for 15 Minutes', emoji: '🤸', color: '#f97316' },
+      { name: 'Write in Journal', emoji: '✍️', color: '#14b8a6' }, { name: 'Take Vitamins', emoji: '💊', color: '#a855f7' }
     ];
-
     const DIET_PRESETS = [
       { name: 'Grilled Chicken Salad', mealType: 'lunch', calories: 350, protein: 35, carbs: 15, fat: 15 },
       { name: 'Oatmeal with Berries', mealType: 'breakfast', calories: 280, protein: 8, carbs: 50, fat: 5 },
@@ -89,7 +53,6 @@
       { name: 'Protein Smoothie', mealType: 'breakfast', calories: 320, protein: 30, carbs: 35, fat: 8 },
       { name: 'Quinoa Buddha Bowl', mealType: 'lunch', calories: 420, protein: 15, carbs: 60, fat: 15 }
     ];
-
     const GOAL_CATEGORIES = [
       { value: 'fitness', label: 'Fitness', emoji: '💪', color: 'bg-orange-100' },
       { value: 'career', label: 'Career', emoji: '💼', color: 'bg-blue-100' },
@@ -101,116 +64,18 @@
       { value: 'relationships', label: 'Relationships', emoji: '👨‍👩‍👧', color: 'bg-purple-100' }
     ];
 
-    // ============ STATE ============
-    let currentPage = 'login';
-    let user = Storage.get(STORAGE_KEYS.USER);
-    let tasks = Storage.getArray(STORAGE_KEYS.TASKS);
-    let habits = Storage.getArray(STORAGE_KEYS.HABITS);
-    let habitLogs = Storage.getArray(STORAGE_KEYS.HABIT_LOGS);
-    let dietEntries = Storage.getArray(STORAGE_KEYS.DIET);
-    let goals = Storage.getArray(STORAGE_KEYS.GOALS);
+    let currentPage = 'login', user = Storage.get(STORAGE_KEYS.USER), tasks = Storage.getArray(STORAGE_KEYS.TASKS), habits = Storage.getArray(STORAGE_KEYS.HABITS), habitLogs = Storage.getArray(STORAGE_KEYS.HABIT_LOGS), dietEntries = Storage.getArray(STORAGE_KEYS.DIET), goals = Storage.getArray(STORAGE_KEYS.GOALS);
 
-    // ============ ROUTER ============
-    function navigate(page) {
-      currentPage = page;
-      render();
-    }
-
-    // ============ RENDER ============
+    function navigate(page) { currentPage = page; render(); }
     function render() {
       const app = document.getElementById('app');
-      if (!user && currentPage !== 'login') {
-        currentPage = 'login';
-      }
-
-      switch(currentPage) {
-        case 'login': app.innerHTML = renderLogin(); break;
-        case 'dashboard': app.innerHTML = renderDashboard(); break;
-        case 'tasks': app.innerHTML = renderTasks(); break;
-        case 'habits': app.innerHTML = renderHabits(); break;
-        case 'diet': app.innerHTML = renderDiet(); break;
-        case 'goals': app.innerHTML = renderGoals(); break;
-        default: app.innerHTML = renderDashboard();
-      }
+      if (!user && currentPage !== 'login') currentPage = 'login';
+      switch(currentPage) { case 'login': app.innerHTML = renderLogin(); break; case 'dashboard': app.innerHTML = renderDashboard(); break; case 'tasks': app.innerHTML = renderTasks(); break; case 'habits': app.innerHTML = renderHabits(); break; case 'diet': app.innerHTML = renderDiet(); break; case 'goals': app.innerHTML = renderGoals(); break; default: app.innerHTML = renderDashboard(); }
       attachEventListeners();
     }
 
-    // ============ LOGIN PAGE ============
-    function renderLogin() {
-      return `
-        <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in">
-            <div class="text-center mb-8">
-              <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <span class="text-3xl">📊</span>
-              </div>
-              <h1 class="text-3xl font-bold text-gray-900 mb-2">Life Tracker Pro</h1>
-              <p class="text-gray-600">Track your tasks, habits, diet & goals</p>
-            </div>
-            <form id="loginForm" class="space-y-5">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                <div class="relative">
-                  <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                  <input type="email" id="loginEmail" required
-                    class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="you@example.com" style="color: #111827 !important;">
-                </div>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                <div class="relative">
-                  <i class="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                  <input type="password" id="loginPassword" required minlength="6"
-                    class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Min 6 characters" style="color: #111827 !important;">
-                  <button type="button" id="togglePassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                </div>
-              </div>
-              <div id="loginError" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg"></div>
-              <button type="submit"
-                class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg shadow-blue-500/25">
-                Sign In
-              </button>
-            </form>
-            <div class="mt-6 text-center">
-              <p class="text-gray-600">Don't have an account?
-                <button id="showRegister" class="text-blue-600 hover:text-blue-700 font-semibold">Sign Up</button>
-              </p>
-            </div>
-            <div id="registerForm" class="hidden mt-6 pt-6 border-t border-gray-200 space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                <div class="relative">
-                  <i class="fas fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                  <input type="text" id="registerName" required
-                    class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="John Doe" style="color: #111827 !important;">
-                </div>
-              </div>
-              <button type="button" id="showLogin"
-                class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg transition">
-                Back to Login
-              </button>
-              <button type="button" id="registerBtn"
-                class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg shadow-green-500/25">
-                Create Account
-              </button>
-            </div>
-            <div class="mt-6 pt-6 border-t border-gray-200">
-              <button id="guestLogin"
-                class="block w-full text-center text-gray-500 hover:text-gray-700 text-sm py-2 px-4 rounded-lg hover:bg-gray-50 transition">
-                Continue as Guest (Demo)
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-    }
+    function renderLogin() { return `<div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in"><div class="text-center mb-8"><div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4"><span class="text-3xl">📊</span></div><h1 class="text-3xl font-bold text-gray-900 mb-2">Life Tracker Pro</h1><p class="text-gray-600">Track your tasks, habits, diet & goals</p></div><form id="loginForm" class="space-y-5"><div><label class="block text-sm font-medium text-gray-700 mb-2">Email</label><div class="relative"><i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i><input type="email" id="loginEmail" required class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="you@example.com" style="color: #111827 !important;"></div></div><div><label class="block text-sm font-medium text-gray-700 mb-2">Password</label><div class="relative"><i class="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i><input type="password" id="loginPassword" required minlength="6" class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Min 6 characters" style="color: #111827 !important;"><button type="button" id="togglePassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"><i class="fas fa-eye"></i></button></div></div><div id="loginError" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg"></div><button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg shadow-blue-500/25">Sign In</button></form><div class="mt-6 text-center"><p class="text-gray-600">Don't have an account? <button id="showRegister" class="text-blue-600 hover:text-blue-700 font-semibold">Sign Up</button></p></div><div id="registerForm" class="hidden mt-6 pt-6 border-t border-gray-200 space-y-4"><div><label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label><div class="relative"><i class="fas fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i><input type="text" id="registerName" required class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="John Doe" style="color: #111827 !important;"></div></div><button type="button" id="showLogin" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg transition">Back to Login</button><button type="button" id="registerBtn" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg shadow-green-500/25">Create Account</button></div><div class="mt-6 pt-6 border-t border-gray-200"><button id="guestLogin" class="block w-full text-center text-gray-500 hover:text-gray-700 text-sm py-2 px-4 rounded-lg hover:bg-gray-50 transition">Continue as Guest (Demo)</button></div></div></div>`; }
 
-    // ============ DASHBOARD ============
     function renderDashboard() {
       const today = getToday();
       const todayTasks = tasks.filter(t => t.dueDate === today || !t.dueDate);
@@ -219,392 +84,21 @@
       const todayDiet = dietEntries.filter(e => e.date === today);
       const totalCalories = todayDiet.reduce((sum, e) => sum + (e.calories || 0), 0);
       const totalWater = todayDiet.reduce((sum, e) => sum + (e.water || 0), 0);
-
-      return `
-        <div class="min-h-screen bg-gray-50">
-          <header class="bg-white shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                    <span class="text-xl">📊</span>
-                  </div>
-                  <div>
-                    <h1 class="text-xl font-bold text-gray-900">Life Tracker</h1>
-                    <p class="text-sm text-gray-500">Welcome, ${user?.name || 'Guest'}!</p>
-                  </div>
-                </div>
-                <div class="flex items-center gap-4">
-                  <div class="text-sm text-gray-500 hidden sm:block">
-                    ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-                  </div>
-                  <button id="logoutBtn"
-                    class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Logout
-                  </button>
-                </div>
-              </div>
-            </div>
-          </header>
-
-          <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              ${renderStatCard('fa-check-circle', 'Tasks Today', `${completedTasks}/${todayTasks.length}`, 'blue')}
-              ${renderStatCard('fa-trophy', 'Habits Done', `${todayHabitsDone}/${habits.length}`, 'green')}
-              ${renderStatCard('fa-tint', 'Water', `${totalWater}/8 glasses`, 'cyan')}
-              ${renderStatCard('fa-fire', 'Calories', `${totalCalories}/2000`, 'orange')}
-            </div>
-
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <button onclick="navigate('tasks')"
-                class="bg-blue-50 hover:bg-blue-100 rounded-xl p-4 transition text-blue-600">
-                <i class="fas fa-tasks text-2xl mb-2"></i>
-                <h3 class="font-semibold text-gray-900">Tasks</h3>
-                <p class="text-sm text-gray-600">Manage tasks</p>
-              </button>
-              <button onclick="navigate('habits')"
-                class="bg-green-50 hover:bg-green-100 rounded-xl p-4 transition text-green-600">
-                <i class="fas fa-star text-2xl mb-2"></i>
-                <h3 class="font-semibold text-gray-900">Habits</h3>
-                <p class="text-sm text-gray-600">Track habits</p>
-              </button>
-              <button onclick="navigate('diet')"
-                class="bg-purple-50 hover:bg-purple-100 rounded-xl p-4 transition text-purple-600">
-                <i class="fas fa-utensils text-2xl mb-2"></i>
-                <h3 class="font-semibold text-gray-900">Diet</h3>
-                <p class="text-sm text-gray-600">Log meals</p>
-              </button>
-              <button onclick="navigate('goals')"
-                class="bg-orange-50 hover:bg-orange-100 rounded-xl p-4 transition text-orange-600">
-                <i class="fas fa-bullseye text-2xl mb-2"></i>
-                <h3 class="font-semibold text-gray-900">Goals</h3>
-                <p class="text-sm text-gray-600">Track goals</p>
-              </button>
-            </div>
-
-            <div class="grid lg:grid-cols-2 gap-6">
-              <div class="bg-white rounded-xl shadow-sm p-6">
-                <div class="flex items-center justify-between mb-4">
-                  <h2 class="text-lg font-semibold text-gray-900">Today's Tasks</h2>
-                  <button onclick="navigate('tasks')" class="text-blue-600 hover:text-blue-700 text-sm font-medium">View All →</button>
-                </div>
-                ${todayTasks.length > 0 ? todayTasks.slice(0, 5).map(task => {
-                  const cat = TASK_CATEGORIES.find(c => c.value === task.category);
-                  return `
-                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-2">
-                      <button onclick="toggleTask('${task.id}')"
-                        class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition ${task.completed ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 hover:border-blue-500'}">
-                        ${task.completed ? '<i class="fas fa-check text-xs"></i>' : ''}
-                      </button>
-                      <div class="flex-1">
-                        <p class="text-gray-900 ${task.completed ? 'line-through text-gray-500' : ''}">${task.title}</p>
-                      </div>
-                      ${cat ? `<span class="text-xs px-2 py-1 rounded-full ${cat.color}">${cat.icon} ${cat.label}</span>` : ''}
-                      <span class="text-xs px-2 py-1 rounded-full ${task.priority === 'high' ? 'bg-red-100 text-red-700' : task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'}">
-                        ${task.priority}
-                      </span>
-                    </div>
-                  `}).join('') : `
-                    <div class="text-center py-8">
-                      <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
-                      <p class="text-gray-500">No tasks for today</p>
-                    </div>
-                  `}
-              </div>
-
-              <div class="bg-white rounded-xl shadow-sm p-6">
-                <div class="flex items-center justify-between mb-4">
-                  <h2 class="text-lg font-semibold text-gray-900">Today's Habits</h2>
-                  <button onclick="navigate('habits')" class="text-blue-600 hover:text-blue-700 text-sm font-medium">View All →</button>
-                </div>
-                ${habits.length > 0 ? habits.map(habit => {
-                  const isDone = habitLogs.some(l => l.habitId === habit.id && l.date === today);
-                  return `
-                    <div class="flex items-center gap-3 p-3 rounded-lg mb-2 ${isDone ? 'bg-green-50' : 'bg-gray-50'}">
-                      <button onclick="toggleHabit('${habit.id}')"
-                        class="w-10 h-10 rounded-full flex items-center justify-center text-xl habit-btn ${isDone ? '' : 'border-2'}"
-                        style="background-color: ${isDone ? habit.color : 'white'}; border-color: ${habit.color}; color: ${isDone ? 'white' : 'inherit'}">
-                        ${habit.emoji}
-                      </button>
-                      <div class="flex-1">
-                        <p class="text-gray-900 ${isDone ? 'line-through text-gray-500' : ''}">${habit.name}</p>
-                      </div>
-                      ${isDone ? '<i class="fas fa-check-circle text-green-500"></i>' : ''}
-                    </div>
-                  `}).join('') : `
-                    <div class="text-center py-8">
-                      <i class="fas fa-star text-4xl text-gray-300 mb-3"></i>
-                      <p class="text-gray-500">No habits tracked yet</p>
-                    </div>
-                  `}
-              </div>
-            </div>
-          </main>
-        </div>
-      `;
+      return `<div class="min-h-screen bg-gray-50"><header class="bg-white shadow-sm"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4"><div class="flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center"><span class="text-xl">📊</span></div><div><h1 class="text-xl font-bold text-gray-900">Life Tracker</h1><p class="text-sm text-gray-500">Welcome, ${user?.name || 'Guest'}!</p></div></div><div class="flex items-center gap-4"><div class="text-sm text-gray-500 hidden sm:block">${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div><button id="logoutBtn" class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"><i class="fas fa-sign-out-alt"></i>Logout</button></div></div></div></header><main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">${renderStatCard('fa-check-circle', 'Tasks Today', `${completedTasks}/${todayTasks.length}`, 'blue')}${renderStatCard('fa-trophy', 'Habits Done', `${todayHabitsDone}/${habits.length}`, 'green')}${renderStatCard('fa-tint', 'Water', `${totalWater}/8 glasses`, 'cyan')}${renderStatCard('fa-fire', 'Calories', `${totalCalories}/2000`, 'orange')}</div><div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"><button onclick="navigate('tasks')" class="bg-blue-50 hover:bg-blue-100 rounded-xl p-4 transition text-blue-600"><i class="fas fa-tasks text-2xl mb-2"></i><h3 class="font-semibold text-gray-900">Tasks</h3><p class="text-sm text-gray-600">Manage tasks</p></button><button onclick="navigate('habits')" class="bg-green-50 hover:bg-green-100 rounded-xl p-4 transition text-green-600"><i class="fas fa-star text-2xl mb-2"></i><h3 class="font-semibold text-gray-900">Habits</h3><p class="text-sm text-gray-600">Track habits</p></button><button onclick="navigate('diet')" class="bg-purple-50 hover:bg-purple-100 rounded-xl p-4 transition text-purple-600"><i class="fas fa-utensils text-2xl mb-2"></i><h3 class="font-semibold text-gray-900">Diet</h3><p class="text-sm text-gray-600">Log meals</p></button><button onclick="navigate('goals')" class="bg-orange-50 hover:bg-orange-100 rounded-xl p-4 transition text-orange-600"><i class="fas fa-bullseye text-2xl mb-2"></i><h3 class="font-semibold text-gray-900">Goals</h3><p class="text-sm text-gray-600">Track goals</p></button></div><div class="grid lg:grid-cols-2 gap-6"><div class="bg-white rounded-xl shadow-sm p-6"><div class="flex items-center justify-between mb-4"><h2 class="text-lg font-semibold text-gray-900">Today's Tasks</h2><button onclick="navigate('tasks')" class="text-blue-600 hover:text-blue-700 text-sm font-medium">View All →</button></div>${todayTasks.length > 0 ? todayTasks.slice(0, 5).map(task => { const cat = TASK_CATEGORIES.find(c => c.value === task.category); return `<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-2"><button onclick="toggleTask('${task.id}')" class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition ${task.completed ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 hover:border-blue-500'}">${task.completed ? '<i class="fas fa-check text-xs"></i>' : ''}</button><div class="flex-1"><p class="text-gray-900 ${task.completed ? 'line-through text-gray-500' : ''}">${task.title}</p></div>${cat ? `<span class="text-xs px-2 py-1 rounded-full ${cat.color}">${cat.icon} ${cat.label}</span>` : ''}<span class="text-xs px-2 py-1 rounded-full ${task.priority === 'high' ? 'bg-red-100 text-red-700' : task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'}">${task.priority}</span></div>`; }).join('') : '<div class="text-center py-8"><i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i><p class="text-gray-500">No tasks for today</p></div>'}</div><div class="bg-white rounded-xl shadow-sm p-6"><div class="flex items-center justify-between mb-4"><h2 class="text-lg font-semibold text-gray-900">Today's Habits</h2><button onclick="navigate('habits')" class="text-blue-600 hover:text-blue-700 text-sm font-medium">View All →</button></div>${habits.length > 0 ? habits.map(habit => { const isDone = habitLogs.some(l => l.habitId === habit.id && l.date === today); return `<div class="flex items-center gap-3 p-3 rounded-lg mb-2 ${isDone ? 'bg-green-50' : 'bg-gray-50'}"><button onclick="toggleHabit('${habit.id}')" class="w-10 h-10 rounded-full flex items-center justify-center text-xl habit-btn ${isDone ? '' : 'border-2'}" style="background-color: ${isDone ? habit.color : 'white'}; border-color: ${habit.color}; color: ${isDone ? 'white' : 'inherit'}">${habit.emoji}</button><div class="flex-1"><p class="text-gray-900 ${isDone ? 'line-through text-gray-500' : ''}">${habit.name}</p></div>${isDone ? '<i class="fas fa-check-circle text-green-500"></i>' : ''}</div>`; }).join('') : '<div class="text-center py-8"><i class="fas fa-star text-4xl text-gray-300 mb-3"></i><p class="text-gray-500">No habits tracked yet</p></div>'}</div></div></main></div>`;
     }
 
-    function renderStatCard(icon, label, value, color) {
-      const colors = {
-        blue: 'bg-blue-100 text-blue-600',
-        green: 'bg-green-100 text-green-600',
-        orange: 'bg-orange-100 text-orange-600',
-        cyan: 'bg-cyan-100 text-cyan-600'
-      };
-      return `
-        <div class="bg-white rounded-xl shadow-sm p-6">
-          <div class="w-12 h-12 rounded-lg ${colors[color]} flex items-center justify-center mb-4">
-            <i class="fas ${icon} text-xl"></i>
-          </div>
-          <p class="text-2xl font-bold text-gray-900">${value}</p>
-          <p class="text-sm text-gray-500 mt-1">${label}</p>
-        </div>
-      `;
-    }
+    function renderStatCard(icon, label, value, color) { const colors = { blue: 'bg-blue-100 text-blue-600', green: 'bg-green-100 text-green-600', orange: 'bg-orange-100 text-orange-600', cyan: 'bg-cyan-100 text-cyan-600' }; return `<div class="bg-white rounded-xl shadow-sm p-6"><div class="w-12 h-12 rounded-lg ${colors[color]} flex items-center justify-center mb-4"><i class="fas ${icon} text-xl"></i></div><p class="text-2xl font-bold text-gray-900">${value}</p><p class="text-sm text-gray-500 mt-1">${label}</p></div>`; }
 
-    // ============ TASKS PAGE ============
     function renderTasks() {
-      const incompleteTasks = tasks.filter(t => !t.completed);
-      const completedTasks = tasks.filter(t => t.completed);
-
-      return `
-        <div class="min-h-screen bg-gray-50">
-          <header class="bg-white shadow-sm">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                  <button onclick="navigate('dashboard')" class="p-2 hover:bg-gray-100 rounded-lg transition">
-                    <i class="fas fa-arrow-left text-gray-600"></i>
-                  </button>
-                  <div>
-                    <h1 class="text-xl font-bold text-gray-900">Tasks</h1>
-                    <p class="text-sm text-gray-500">Manage your tasks and to-dos</p>
-                  </div>
-                </div>
-                <button onclick="showTaskForm()"
-                  class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
-                  <i class="fas fa-plus"></i> Add Task
-                </button>
-              </div>
-            </div>
-          </header>
-
-          <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div id="taskForm" class="hidden bg-white rounded-xl shadow-sm p-6 mb-6">
-              <h2 class="text-lg font-semibold text-gray-900 mb-4">Create New Task</h2>
-              <form id="newTaskForm" class="space-y-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                  <input type="text" id="taskTitle" required
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter task title" style="color: #111827 !important;">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <textarea id="taskDesc" rows="2"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Task description (optional)" style="color: #111827 !important;"></textarea>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                  <div class="grid grid-cols-5 gap-2">
-                    ${TASK_CATEGORIES.map(cat => `
-                      <button type="button" onclick="selectTaskCategory('${cat.value}')"
-                        class="p-2 rounded-lg border-2 transition text-center category-btn" data-category="${cat.value}">
-                        <span class="text-xl">${cat.icon}</span>
-                        <p class="text-xs mt-1 text-gray-700">${cat.label}</p>
-                      </button>
-                    `).join('')}
-                  </div>
-                  <input type="hidden" id="taskCategory" value="">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-                    <select id="taskPriority"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" style="color: #111827 !important;">
-                      <option value="low">Low</option>
-                      <option value="medium" selected>Medium</option>
-                      <option value="high">High</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
-                    <input type="date" id="taskDueDate"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" style="color: #111827 !important;">
-                  </div>
-                </div>
-                <div class="flex gap-3">
-                  <button type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">Create Task</button>
-                  <button type="button" onclick="hideTaskForm()"
-                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition">Cancel</button>
-                </div>
-              </form>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-              <h2 class="text-lg font-semibold text-gray-900 mb-4">Active Tasks (${incompleteTasks.length})</h2>
-              ${incompleteTasks.length > 0 ? incompleteTasks.map(task => {
-                const cat = TASK_CATEGORIES.find(c => c.value === task.category);
-                return `
-                  <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg mb-2">
-                    <button onclick="toggleTask('${task.id}')"
-                      class="w-6 h-6 rounded-full border-2 border-gray-300 hover:border-blue-500 flex items-center justify-center transition">
-                    </button>
-                    <div class="flex-1">
-                      <p class="text-gray-900 font-medium">${task.title}</p>
-                      ${task.description ? `<p class="text-gray-500 text-sm">${task.description}</p>` : ''}
-                      <div class="flex items-center gap-3 mt-2">
-                        ${cat ? `<span class="text-xs px-2 py-1 rounded-full ${cat.color}">${cat.icon} ${cat.label}</span>` : ''}
-                        <span class="text-xs px-2 py-1 rounded-full ${task.priority === 'high' ? 'bg-red-100 text-red-700' : task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'}">${task.priority}</span>
-                        ${task.dueDate ? `<span class="text-xs text-gray-500"><i class="far fa-calendar mr-1"></i>${new Date(task.dueDate).toLocaleDateString()}</span>` : ''}
-                      </div>
-                    </div>
-                    <button onclick="deleteTask('${task.id}')" class="text-gray-400 hover:text-red-500 transition p-2">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </div>
-                `}).join('') : '<p class="text-gray-500 text-center py-8">No active tasks. Create one above!</p>'}
-            </div>
-
-            ${completedTasks.length > 0 ? `
-              <div class="bg-white rounded-xl shadow-sm p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Completed (${completedTasks.length})</h2>
-                ${completedTasks.map(task => {
-                  const cat = TASK_CATEGORIES.find(c => c.value === task.category);
-                  return `
-                    <div class="flex items-center gap-4 p-4 bg-green-50 rounded-lg mb-2">
-                      <button onclick="toggleTask('${task.id}')"
-                        class="w-6 h-6 rounded-full bg-green-500 border-2 border-green-500 flex items-center justify-center text-white">
-                        <i class="fas fa-check text-xs"></i>
-                      </button>
-                      <div class="flex-1">
-                        <p class="text-gray-500 line-through">${task.title}</p>
-                      </div>
-                      <button onclick="deleteTask('${task.id}')" class="text-gray-400 hover:text-red-500 transition p-2">
-                        <i class="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  `}).join('')}
-              </div>
-            ` : ''}
-          </main>
-        </div>
-      `;
+      const incompleteTasks = tasks.filter(t => !t.completed), completedTasks = tasks.filter(t => t.completed);
+      return `<div class="min-h-screen bg-gray-50"><header class="bg-white shadow-sm"><div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4"><div class="flex items-center justify-between"><div class="flex items-center gap-4"><button onclick="navigate('dashboard')" class="p-2 hover:bg-gray-100 rounded-lg transition"><i class="fas fa-arrow-left text-gray-600"></i></button><div><h1 class="text-xl font-bold text-gray-900">Tasks</h1><p class="text-sm text-gray-500">Manage your tasks and to-dos</p></div></div><button onclick="showTaskForm()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"><i class="fas fa-plus"></i> Add Task</button></div></div></header><main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><div id="taskForm" class="hidden bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-900 mb-4">Create New Task</h2><form id="newTaskForm" class="space-y-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Title</label><input type="text" id="taskTitle" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Enter task title" style="color: #111827 !important;"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Description</label><textarea id="taskDesc" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Task description (optional)" style="color: #111827 !important;"></textarea></div><div><label class="block text-sm font-medium text-gray-700 mb-2">Category</label><div class="grid grid-cols-5 gap-2">${TASK_CATEGORIES.map(cat => `<button type="button" onclick="selectTaskCategory('${cat.value}')" class="p-2 rounded-lg border-2 transition text-center category-btn" data-category="${cat.value}"><span class="text-xl">${cat.icon}</span><p class="text-xs mt-1 text-gray-700">${cat.label}</p></button>`).join('')}</div><input type="hidden" id="taskCategory" value=""></div><div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Priority</label><select id="taskPriority" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" style="color: #111827 !important;"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Due Date</label><input type="date" id="taskDueDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" style="color: #111827 !important;"></div></div><div class="flex gap-3"><button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">Create Task</button><button type="button" onclick="hideTaskForm()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition">Cancel</button></div></form></div><div class="bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-900 mb-4">Active Tasks (${incompleteTasks.length})</h2>${incompleteTasks.length > 0 ? incompleteTasks.map(task => { const cat = TASK_CATEGORIES.find(c => c.value === task.category); return `<div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg mb-2"><button onclick="toggleTask('${task.id}')" class="w-6 h-6 rounded-full border-2 border-gray-300 hover:border-blue-500 flex items-center justify-center transition"></button><div class="flex-1"><p class="text-gray-900 font-medium">${task.title}</p>${task.description ? `<p class="text-gray-500 text-sm">${task.description}</p>` : ''}<div class="flex items-center gap-3 mt-2">${cat ? `<span class="text-xs px-2 py-1 rounded-full ${cat.color}">${cat.icon} ${cat.label}</span>` : ''}<span class="text-xs px-2 py-1 rounded-full ${task.priority === 'high' ? 'bg-red-100 text-red-700' : task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'}">${task.priority}</span>${task.dueDate ? `<span class="text-xs text-gray-500"><i class="far fa-calendar mr-1"></i>${new Date(task.dueDate).toLocaleDateString()}</span>` : ''}</div></div><button onclick="deleteTask('${task.id}')" class="text-gray-400 hover:text-red-500 transition p-2"><i class="fas fa-trash"></i></button></div>`; }).join('') : '<p class="text-gray-500 text-center py-8">No active tasks. Create one above!</p>'}</div>${completedTasks.length > 0 ? `<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-lg font-semibold text-gray-900 mb-4">Completed (${completedTasks.length})</h2>${completedTasks.map(task => `<div class="flex items-center gap-4 p-4 bg-green-50 rounded-lg mb-2"><button onclick="toggleTask('${task.id}')" class="w-6 h-6 rounded-full bg-green-500 border-2 border-green-500 flex items-center justify-center text-white"><i class="fas fa-check text-xs"></i></button><div class="flex-1"><p class="text-gray-500 line-through">${task.title}</p></div><button onclick="deleteTask('${task.id}')" class="text-gray-400 hover:text-red-500 transition p-2"><i class="fas fa-trash"></i></button></div>`).join('')}</div>` : ''}</main></div>`;
     }
 
-    // ============ HABITS PAGE ============
     function renderHabits() {
       const today = getToday();
-
-      return `
-        <div class="min-h-screen bg-gray-50">
-          <header class="bg-white shadow-sm">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                  <button onclick="navigate('dashboard')" class="p-2 hover:bg-gray-100 rounded-lg transition">
-                    <i class="fas fa-arrow-left text-gray-600"></i>
-                  </button>
-                  <div>
-                    <h1 class="text-xl font-bold text-gray-900">Habits</h1>
-                    <p class="text-sm text-gray-500">Track your daily habits - ${habitLogs.filter(l => l.date === today).length}/${habits.length} done today</p>
-                  </div>
-                </div>
-                <button onclick="showHabitForm()"
-                  class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
-                  <i class="fas fa-plus"></i> Add Habit
-                </button>
-              </div>
-            </div>
-          </header>
-
-          <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div id="habitForm" class="hidden bg-white rounded-xl shadow-sm p-6 mb-6">
-              <h2 class="text-lg font-semibold text-gray-900 mb-4">Create New Habit</h2>
-              <form id="newHabitForm" class="space-y-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Quick Add Presets</label>
-                  <div class="grid grid-cols-4 gap-2 mb-4">
-                    ${HABIT_PRESETS.slice(0, 8).map(preset => `
-                      <button type="button" onclick="applyHabitPreset('${preset.name}', '${preset.emoji}', '${preset.color}')"
-                        class="p-2 rounded-lg border border-gray-200 hover:border-green-500 transition text-center">
-                        <span class="text-xl">${preset.emoji}</span>
-                        <p class="text-xs mt-1 text-gray-700 truncate">${preset.name}</p>
-                      </button>
-                    `).join('')}
-                  </div>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Habit Name</label>
-                  <input type="text" id="habitName" required
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                    placeholder="e.g., Morning Exercise" style="color: #111827 !important;">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Choose Emoji</label>
-                  <div class="flex flex-wrap gap-2" id="emojiOptions">
-                    ${['💪','📚','🏃','💧','🧘','😴','🥗','✍️','🎯','🧠','🎨','🎵','💊','🤸','📖','🧹'].map(e => `
-                      <button type="button" onclick="selectEmoji('${e}')"
-                        class="w-10 h-10 text-xl rounded-lg bg-gray-100 hover:bg-gray-200 transition emoji-btn" data-emoji="${e}">${e}</button>
-                    `).join('')}
-                  </div>
-                  <input type="hidden" id="habitEmoji" value="💪">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Choose Color</label>
-                  <div class="flex flex-wrap gap-2" id="colorOptions">
-                    ${['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16'].map(c => `
-                      <button type="button" onclick="selectColor('${c}')"
-                        class="w-10 h-10 rounded-lg color-btn" style="background-color: ${c}" data-color="${c}"></button>
-                    `).join('')}
-                  </div>
-                  <input type="hidden" id="habitColor" value="#3b82f6">
-                </div>
-                <div class="flex gap-3">
-                  <button type="submit"
-                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">Create Habit</button>
-                  <button type="button" onclick="hideHabitForm()"
-                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition">Cancel</button>
-                </div>
-              </form>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-6">
-              <h2 class="text-lg font-semibold text-gray-900 mb-4">Your Habits</h2>
-              ${habits.length > 0 ? habits.map(habit => {
-                const isDone = habitLogs.some(l => l.habitId === habit.id && l.date === today);
-                return `
-                  <div class="flex items-center gap-4 p-4 rounded-lg mb-2 ${isDone ? 'bg-green-50' : 'bg-gray-50'}">
-                    <button onclick="toggleHabit('${habit.id}')"
-                      class="w-12 h-12 rounded-full flex items-center justify-center text-2xl habit-btn"
-                      style="background-color: ${isDone ? habit.color : 'white'}; border: 2px solid ${habit.color}; color: ${isDone ? 'white' : 'inherit'}">
-                      ${habit.emoji}
-                    </button>
-                    <div class="flex-1">
-                      <p class="text-gray-900 font-medium ${isDone ? 'line-through text-gray-500' : ''}">${habit.name}</p>
-                    </div>
-                    ${isDone ? '<i class="fas fa-check-circle text-green-500 text-xl"></i>' : ''}
-                    <button onclick="deleteHabit('${habit.id}')" class="text-gray-400 hover:text-red-500 transition p-2">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </div>
-                `}).join('') : `
-                  <div class="text-center py-12">
-                    <i class="fas fa-star text-5xl text-gray-300 mb-4"></i>
-                    <p class="text-gray-500 mb-2">No habits created yet</p>
-                    <p class="text-gray-400 text-sm">Start tracking your daily habits!</p>
-                  </div>
-                `}
-            </div>
-          </main>
-        </div>
-      `;
+      return `<div class="min-h-screen bg-gray-50"><header class="bg-white shadow-sm"><div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4"><div class="flex items-center justify-between"><div class="flex items-center gap-4"><button onclick="navigate('dashboard')" class="p-2 hover:bg-gray-100 rounded-lg transition"><i class="fas fa-arrow-left text-gray-600"></i></button><div><h1 class="text-xl font-bold text-gray-900">Habits</h1><p class="text-sm text-gray-500">Track your daily habits - ${habitLogs.filter(l => l.date === today).length}/${habits.length} done today</p></div></div><button onclick="showHabitForm()" class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"><i class="fas fa-plus"></i> Add Habit</button></div></div></header><main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><div id="habitForm" class="hidden bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-900 mb-4">Create New Habit</h2><form id="newHabitForm" class="space-y-4"><div><label class="block text-sm font-medium text-gray-700 mb-2">Quick Add Presets</label><div class="grid grid-cols-4 gap-2 mb-4">${HABIT_PRESETS.slice(0, 8).map(preset => `<button type="button" onclick="applyHabitPreset('${preset.name}', '${preset.emoji}', '${preset.color}')" class="p-2 rounded-lg border border-gray-200 hover:border-green-500 transition text-center"><span class="text-xl">${preset.emoji}</span><p class="text-xs mt-1 text-gray-700 truncate">${preset.name}</p></button>`).join('')}</div></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Habit Name</label><input type="text" id="habitName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="e.g., Morning Exercise" style="color: #111827 !important;"></div><div><label class="block text-sm font-medium text-gray-700 mb-2">Choose Emoji</label><div class="flex flex-wrap gap-2" id="emojiOptions">${['💪','📚','🏃','💧','🧘','😴','🥗','✍️','🎯','🧠','🎨','🎵','💊','🤸','📖','🧹'].map(e => `<button type="button" onclick="selectEmoji('${e}')" class="w-10 h-10 text-xl rounded-lg bg-gray-100 hover:bg-gray-200 transition emoji-btn" data-emoji="${e}">${e}</button>`).join('')}</div><input type="hidden" id="habitEmoji" value="💪"></div><div><label class="block text-sm font-medium text-gray-700 mb-2">Choose Color</label><div class="flex flex-wrap gap-2" id="colorOptions">${['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16'].map(c => `<button type="button" onclick="selectColor('${c}')" class="w-10 h-10 rounded-lg color-btn" style="background-color: ${c}" data-color="${c}"></button>`).join('')}</div><input type="hidden" id="habitColor" value="#3b82f6"></div><div class="flex gap-3"><button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">Create Habit</button><button type="button" onclick="hideHabitForm()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition">Cancel</button></div></form></div><div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-lg font-semibold text-gray-900 mb-4">Your Habits</h2>${habits.length > 0 ? habits.map(habit => { const isDone = habitLogs.some(l => l.habitId === habit.id && l.date === today); return `<div class="flex items-center gap-4 p-4 rounded-lg mb-2 ${isDone ? 'bg-green-50' : 'bg-gray-50'}"><button onclick="toggleHabit('${habit.id}')" class="w-12 h-12 rounded-full flex items-center justify-center text-2xl habit-btn" style="background-color: ${isDone ? habit.color : 'white'}; border: 2px solid ${habit.color}; color: ${isDone ? 'white' : 'inherit'}">${habit.emoji}</button><div class="flex-1"><p class="text-gray-900 font-medium ${isDone ? 'line-through text-gray-500' : ''}">${habit.name}</p></div>${isDone ? '<i class="fas fa-check-circle text-green-500 text-xl"></i>' : ''}<button onclick="deleteHabit('${habit.id}')" class="text-gray-400 hover:text-red-500 transition p-2"><i class="fas fa-trash"></i></button></div>`; }).join('') : '<div class="text-center py-12"><i class="fas fa-star text-5xl text-gray-300 mb-4"></i><p class="text-gray-500 mb-2">No habits created yet</p><p class="text-gray-400 text-sm">Start tracking your daily habits!</p></div>'}</div></main></div>`;
     }
 
-    // ============ DIET PAGE ============
     function renderDiet() {
       const today = getToday();
       const todayEntries = dietEntries.filter(e => e.date === today);
@@ -612,541 +106,37 @@
       const totalWater = todayEntries.reduce((sum, e) => sum + (e.water || 0), 0);
       const totalProtein = todayEntries.reduce((sum, e) => sum + (e.protein || 0), 0);
       const totalCarbs = todayEntries.reduce((sum, e) => sum + (e.carbs || 0), 0);
-
-      return `
-        <div class="min-h-screen bg-gray-50">
-          <header class="bg-white shadow-sm">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                  <button onclick="navigate('dashboard')" class="p-2 hover:bg-gray-100 rounded-lg transition">
-                    <i class="fas fa-arrow-left text-gray-600"></i>
-                  </button>
-                  <div>
-                    <h1 class="text-xl font-bold text-gray-900">Diet Tracker</h1>
-                    <p class="text-sm text-gray-500">Track your nutrition and water intake</p>
-                  </div>
-                </div>
-                <button onclick="showDietForm()"
-                  class="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition">
-                  <i class="fas fa-plus"></i> Log Meal
-                </button>
-              </div>
-            </div>
-          </header>
-
-          <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div class="bg-white rounded-xl shadow-sm p-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-fire text-orange-600"></i>
-                  </div>
-                  <div>
-                    <p class="text-2xl font-bold text-gray-900">${totalCalories}</p>
-                    <p class="text-sm text-gray-500">Calories</p>
-                  </div>
-                </div>
-              </div>
-              <div class="bg-white rounded-xl shadow-sm p-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-tint text-cyan-600"></i>
-                  </div>
-                  <div>
-                    <p class="text-2xl font-bold text-gray-900">${totalWater}</p>
-                    <p class="text-sm text-gray-500">Glasses of Water</p>
-                  </div>
-                </div>
-              </div>
-              <div class="bg-white rounded-xl shadow-sm p-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-drumstick-bite text-red-600"></i>
-                  </div>
-                  <div>
-                    <p class="text-2xl font-bold text-gray-900">${totalProtein}g</p>
-                    <p class="text-sm text-gray-500">Protein</p>
-                  </div>
-                </div>
-              </div>
-              <div class="bg-white rounded-xl shadow-sm p-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-bread-slice text-amber-600"></i>
-                  </div>
-                  <div>
-                    <p class="text-2xl font-bold text-gray-900">${totalCarbs}g</p>
-                    <p class="text-sm text-gray-500">Carbs</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div id="dietForm" class="hidden bg-white rounded-xl shadow-sm p-6 mb-6">
-              <h2 class="text-lg font-semibold text-gray-900 mb-4">Log Food Entry</h2>
-              <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Quick Add Presets</label>
-                <div class="grid grid-cols-3 gap-2">
-                  ${DIET_PRESETS.map(preset => `
-                    <button type="button" onclick="applyDietPreset('${preset.name}', '${preset.mealType}', ${preset.calories}, ${preset.protein}, ${preset.carbs}, ${preset.fat})"
-                      class="p-2 rounded-lg border border-gray-200 hover:border-purple-500 transition text-left">
-                      <p class="text-sm font-medium text-gray-900">${preset.name}</p>
-                      <p class="text-xs text-gray-500">${preset.calories} cal | ${preset.protein}g protein</p>
-                    </button>
-                  `).join('')}
-                </div>
-              </div>
-              <form id="newDietForm" class="space-y-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Meal Type</label>
-                  <div class="grid grid-cols-4 gap-2">
-                    ${[{v:'breakfast',e:'🌅',l:'Breakfast'},{v:'lunch',e:'☀️',l:'Lunch'},{v:'dinner',e:'🌙',l:'Dinner'},{v:'snack',e:'🍎',l:'Snack'}].map(m => `
-                      <button type="button" onclick="selectMealType('${m.v}')"
-                        class="p-3 rounded-lg border-2 transition meal-btn" data-meal="${m.v}">
-                        <span class="text-xl">${m.e}</span>
-                        <p class="text-xs mt-1 text-gray-700">${m.l}</p>
-                      </button>
-                    `).join('')}
-                  </div>
-                  <input type="hidden" id="mealType" value="breakfast">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Food Name</label>
-                  <input type="text" id="foodName" required
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                    placeholder="e.g., Grilled Chicken Salad" style="color: #111827 !important;">
-                </div>
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Calories</label>
-                    <input type="number" id="foodCalories" min="0"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                      placeholder="0" style="color: #111827 !important;">
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Protein (g)</label>
-                    <input type="number" id="foodProtein" min="0" step="0.1"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                      placeholder="0" style="color: #111827 !important;">
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Carbs (g)</label>
-                    <input type="number" id="foodCarbs" min="0" step="0.1"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                      placeholder="0" style="color: #111827 !important;">
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Fat (g)</label>
-                    <input type="number" id="foodFat" min="0" step="0.1"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                      placeholder="0" style="color: #111827 !important;">
-                  </div>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Water (glasses)</label>
-                  <input type="number" id="foodWater" min="0"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                    placeholder="0" style="color: #111827 !important;">
-                </div>
-                <div class="flex gap-3">
-                  <button type="submit"
-                    class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition">Log Entry</button>
-                  <button type="button" onclick="hideDietForm()"
-                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition">Cancel</button>
-                </div>
-              </form>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-6">
-              <h2 class="text-lg font-semibold text-gray-900 mb-4">Today's Food Log</h2>
-              ${todayEntries.length > 0 ? todayEntries.map(entry => {
-                const mealEmojis = {breakfast:'🌅',lunch:'☀️',dinner:'🌙',snack:'🍎'};
-                return `
-                  <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg mb-2">
-                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-2xl">
-                      ${mealEmojis[entry.mealType]}
-                    </div>
-                    <div class="flex-1">
-                      <p class="text-gray-900 font-medium">${entry.foodName}</p>
-                      <div class="flex items-center gap-4 mt-1 text-sm text-gray-500">
-                        <span><i class="fas fa-fire mr-1"></i>${entry.calories} cal</span>
-                        ${entry.protein > 0 ? `<span><i class="fas fa-drumstick-bite mr-1"></i>${entry.protein}g protein</span>` : ''}
-                        ${entry.water > 0 ? `<span><i class="fas fa-tint mr-1"></i>${entry.water} water</span>` : ''}
-                      </div>
-                    </div>
-                    <button onclick="deleteDietEntry('${entry.id}')" class="text-gray-400 hover:text-red-500 transition p-2">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </div>
-                `}).join('') : `
-                  <div class="text-center py-12">
-                    <i class="fas fa-utensils text-5xl text-gray-300 mb-4"></i>
-                    <p class="text-gray-500 mb-2">No meals logged today</p>
-                    <p class="text-gray-400 text-sm">Start tracking your nutrition!</p>
-                  </div>
-                `}
-            </div>
-          </main>
-        </div>
-      `;
+      return `<div class="min-h-screen bg-gray-50"><header class="bg-white shadow-sm"><div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4"><div class="flex items-center justify-between"><div class="flex items-center gap-4"><button onclick="navigate('dashboard')" class="p-2 hover:bg-gray-100 rounded-lg transition"><i class="fas fa-arrow-left text-gray-600"></i></button><div><h1 class="text-xl font-bold text-gray-900">Diet Tracker</h1><p class="text-sm text-gray-500">Track your nutrition and water intake</p></div></div><button onclick="showDietForm()" class="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition"><i class="fas fa-plus"></i> Log Meal</button></div></div></header><main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6"><div class="bg-white rounded-xl shadow-sm p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center"><i class="fas fa-fire text-orange-600"></i></div><div><p class="text-2xl font-bold text-gray-900">${totalCalories}</p><p class="text-sm text-gray-500">Calories</p></div></div></div><div class="bg-white rounded-xl shadow-sm p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center"><i class="fas fa-tint text-cyan-600"></i></div><div><p class="text-2xl font-bold text-gray-900">${totalWater}</p><p class="text-sm text-gray-500">Glasses of Water</p></div></div></div><div class="bg-white rounded-xl shadow-sm p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center"><i class="fas fa-drumstick-bite text-red-600"></i></div><div><p class="text-2xl font-bold text-gray-900">${totalProtein}g</p><p class="text-sm text-gray-500">Protein</p></div></div></div><div class="bg-white rounded-xl shadow-sm p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center"><i class="fas fa-bread-slice text-amber-600"></i></div><div><p class="text-2xl font-bold text-gray-900">${totalCarbs}g</p><p class="text-sm text-gray-500">Carbs</p></div></div></div></div><div id="dietForm" class="hidden bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-900 mb-4">Log Food Entry</h2><div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-2">Quick Add Presets</label><div class="grid grid-cols-3 gap-2">${DIET_PRESETS.map(preset => `<button type="button" onclick="applyDietPreset('${preset.name}', '${preset.mealType}', ${preset.calories}, ${preset.protein}, ${preset.carbs}, ${preset.fat})" class="p-2 rounded-lg border border-gray-200 hover:border-purple-500 transition text-left"><p class="text-sm font-medium text-gray-900">${preset.name}</p><p class="text-xs text-gray-500">${preset.calories} cal | ${preset.protein}g protein</p></button>`).join('')}</div></div><form id="newDietForm" class="space-y-4"><div><label class="block text-sm font-medium text-gray-700 mb-2">Meal Type</label><div class="grid grid-cols-4 gap-2">${[{v:'breakfast',e:'🌅',l:'Breakfast'},{v:'lunch',e:'☀️',l:'Lunch'},{v:'dinner',e:'🌙',l:'Dinner'},{v:'snack',e:'🍎',l:'Snack'}].map(m => `<button type="button" onclick="selectMealType('${m.v}')" class="p-3 rounded-lg border-2 transition meal-btn" data-meal="${m.v}"><span class="text-xl">${m.e}</span><p class="text-xs mt-1 text-gray-700">${m.l}</p></button>`).join('')}</div><input type="hidden" id="mealType" value="breakfast"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Food Name</label><input type="text" id="foodName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="e.g., Grilled Chicken Salad" style="color: #111827 !important;"></div><div class="grid grid-cols-2 lg:grid-cols-4 gap-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Calories</label><input type="number" id="foodCalories" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="0" style="color: #111827 !important;"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Protein (g)</label><input type="number" id="foodProtein" min="0" step="0.1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="0" style="color: #111827 !important;"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Carbs (g)</label><input type="number" id="foodCarbs" min="0" step="0.1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="0" style="color: #111827 !important;"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Fat (g)</label><input type="number" id="foodFat" min="0" step="0.1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="0" style="color: #111827 !important;"></div></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Water (glasses)</label><input type="number" id="foodWater" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="0" style="color: #111827 !important;"></div><div class="flex gap-3"><button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition">Log Entry</button><button type="button" onclick="hideDietForm()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition">Cancel</button></div></form></div><div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-lg font-semibold text-gray-900 mb-4">Today's Food Log</h2>${todayEntries.length > 0 ? todayEntries.map(entry => { const mealEmojis = {breakfast:'🌅',lunch:'☀️',dinner:'🌙',snack:'🍎'}; return `<div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg mb-2"><div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-2xl">${mealEmojis[entry.mealType]}</div><div class="flex-1"><p class="text-gray-900 font-medium">${entry.foodName}</p><div class="flex items-center gap-4 mt-1 text-sm text-gray-500"><span><i class="fas fa-fire mr-1"></i>${entry.calories} cal</span>${entry.protein > 0 ? `<span><i class="fas fa-drumstick-bite mr-1"></i>${entry.protein}g protein</span>` : ''}${entry.water > 0 ? `<span><i class="fas fa-tint mr-1"></i>${entry.water} water</span>` : ''}</div></div><button onclick="deleteDietEntry('${entry.id}')" class="text-gray-400 hover:text-red-500 transition p-2"><i class="fas fa-trash"></i></button></div>`; }).join('') : '<div class="text-center py-12"><i class="fas fa-utensils text-5xl text-gray-300 mb-4"></i><p class="text-gray-500 mb-2">No meals logged today</p><p class="text-gray-400 text-sm">Start tracking your nutrition!</p></div>'}</div></main></div>`;
     }
 
-    // ============ GOALS PAGE ============
     function renderGoals() {
-      const activeGoals = goals.filter(g => !g.completed);
-      const completedGoals = goals.filter(g => g.completed);
-
-      return `
-        <div class="min-h-screen bg-gray-50">
-          <header class="bg-white shadow-sm">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                  <button onclick="navigate('dashboard')" class="p-2 hover:bg-gray-100 rounded-lg transition">
-                    <i class="fas fa-arrow-left text-gray-600"></i>
-                  </button>
-                  <div>
-                    <h1 class="text-xl font-bold text-gray-900">Goals</h1>
-                    <p class="text-sm text-gray-500">Set and track your long-term goals</p>
-                  </div>
-                </div>
-                <button onclick="showGoalForm()"
-                  class="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition">
-                  <i class="fas fa-plus"></i> Add Goal
-                </button>
-              </div>
-            </div>
-          </header>
-
-          <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div id="goalForm" class="hidden bg-white rounded-xl shadow-sm p-6 mb-6">
-              <h2 class="text-lg font-semibold text-gray-900 mb-4">Create New Goal</h2>
-              <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Goal Categories</label>
-                <div class="grid grid-cols-4 gap-2">
-                  ${GOAL_CATEGORIES.map(cat => `
-                    <button type="button" onclick="selectGoalCategory('${cat.value}')"
-                      class="p-3 rounded-lg border-2 transition text-center category-btn" data-category="${cat.value}">
-                      <span class="text-2xl">${cat.emoji}</span>
-                      <p class="text-xs mt-1 text-gray-700">${cat.label}</p>
-                    </button>
-                  `).join('')}
-                </div>
-              </div>
-              <form id="newGoalForm" class="space-y-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Goal Title</label>
-                  <input type="text" id="goalTitle" required
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                    placeholder="e.g., Run a Marathon" style="color: #111827 !important;">
-                </div>
-                <div class="grid grid-cols-3 gap-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Target Value</label>
-                    <input type="number" id="goalTarget" required min="0"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                      placeholder="0" style="color: #111827 !important;">
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Current Value</label>
-                    <input type="number" id="goalCurrent" min="0"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                      placeholder="0" style="color: #111827 !important;">
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Unit</label>
-                    <input type="text" id="goalUnit"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                      placeholder="e.g., km, pages" style="color: #111827 !important;">
-                  </div>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                  <input type="date" id="goalDeadline"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" style="color: #111827 !important;">
-                </div>
-                <div class="flex gap-3">
-                  <button type="submit"
-                    class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition">Create Goal</button>
-                  <button type="button" onclick="hideGoalForm()"
-                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition">Cancel</button>
-                </div>
-              </form>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-              <h2 class="text-lg font-semibold text-gray-900 mb-4">Active Goals (${activeGoals.length})</h2>
-              ${activeGoals.length > 0 ? activeGoals.map(goal => {
-                const cat = GOAL_CATEGORIES.find(c => c.value === goal.category);
-                const progress = Math.min((goal.currentValue / goal.targetValue) * 100, 100);
-                const isOverdue = goal.deadline && new Date(goal.deadline) < new Date();
-                return `
-                  <div class="p-4 rounded-lg mb-4 ${isOverdue ? 'bg-red-50' : 'bg-gray-50'}">
-                    <div class="flex items-start justify-between mb-3">
-                      <div class="flex items-center gap-3">
-                        ${cat ? `<span class="text-2xl">${cat.emoji}</span>` : ''}
-                        <div>
-                          <p class="text-gray-900 font-medium">${goal.title}</p>
-                          <p class="text-sm text-gray-500">${goal.currentValue} / ${goal.targetValue} ${goal.unit}</p>
-                        </div>
-                      </div>
-                      ${goal.deadline ? `<span class="text-xs px-2 py-1 rounded-full ${isOverdue ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-600'}"><i class="far fa-calendar mr-1"></i>${new Date(goal.deadline).toLocaleDateString()}</span>` : ''}
-                    </div>
-                    <div class="mb-3">
-                      <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-orange-400 to-orange-600 transition-all" style="width: ${progress}%"></div>
-                      </div>
-                      <p class="text-xs text-gray-500 mt-1">${Math.round(progress)}% complete</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                      <input type="number" value="${goal.currentValue}" onchange="updateGoalProgress('${goal.id}', this.value)"
-                        class="w-24 px-3 py-1 text-sm border border-gray-300 rounded-lg" min="0" style="color: #111827 !important;">
-                      <span class="text-sm text-gray-500">${goal.unit}</span>
-                      <button onclick="completeGoal('${goal.id}')"
-                        class="ml-auto text-sm text-orange-600 hover:text-orange-700 font-medium">Mark Complete</button>
-                    </div>
-                  </div>
-                `}).join('') : `
-                  <div class="text-center py-8">
-                    <i class="fas fa-bullseye text-4xl text-gray-300 mb-3"></i>
-                    <p class="text-gray-500">No active goals. Set your first goal above!</p>
-                  </div>
-                `}
-            </div>
-
-            ${completedGoals.length > 0 ? `
-              <div class="bg-white rounded-xl shadow-sm p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Completed (${completedGoals.length})</h2>
-                ${completedGoals.map(goal => `
-                  <div class="flex items-center gap-4 p-4 bg-green-50 rounded-lg mb-2">
-                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                      <i class="fas fa-check text-green-600"></i>
-                    </div>
-                    <div class="flex-1">
-                      <p class="text-gray-500 line-through">${goal.title}</p>
-                      <p class="text-sm text-gray-400">Achieved: ${goal.targetValue} ${goal.unit}</p>
-                    </div>
-                    <button onclick="deleteGoal('${goal.id}')" class="text-gray-400 hover:text-red-500 transition p-2">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </div>
-                `).join('')}
-              </div>
-            ` : ''}
-          </main>
-        </div>
-      `;
+      const activeGoals = goals.filter(g => !g.completed), completedGoals = goals.filter(g => g.completed);
+      return `<div class="min-h-screen bg-gray-50"><header class="bg-white shadow-sm"><div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4"><div class="flex items-center justify-between"><div class="flex items-center gap-4"><button onclick="navigate('dashboard')" class="p-2 hover:bg-gray-100 rounded-lg transition"><i class="fas fa-arrow-left text-gray-600"></i></button><div><h1 class="text-xl font-bold text-gray-900">Goals</h1><p class="text-sm text-gray-500">Set and track your long-term goals</p></div></div><button onclick="showGoalForm()" class="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition"><i class="fas fa-plus"></i> Add Goal</button></div></div></header><main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><div id="goalForm" class="hidden bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-900 mb-4">Create New Goal</h2><div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-2">Goal Categories</label><div class="grid grid-cols-4 gap-2">${GOAL_CATEGORIES.map(cat => `<button type="button" onclick="selectGoalCategory('${cat.value}')" class="p-3 rounded-lg border-2 transition text-center category-btn" data-category="${cat.value}"><span class="text-2xl">${cat.emoji}</span><p class="text-xs mt-1 text-gray-700">${cat.label}</p></button>`).join('')}</div></div><form id="newGoalForm" class="space-y-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Goal Title</label><input type="text" id="goalTitle" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="e.g., Run a Marathon" style="color: #111827 !important;"></div><div class="grid grid-cols-3 gap-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Target Value</label><input type="number" id="goalTarget" required min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="0" style="color: #111827 !important;"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Current Value</label><input type="number" id="goalCurrent" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="0" style="color: #111827 !important;"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Unit</label><input type="text" id="goalUnit" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="e.g., km, pages" style="color: #111827 !important;"></div></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label><input type="date" id="goalDeadline" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" style="color: #111827 !important;"></div><div class="flex gap-3"><button type="submit" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition">Create Goal</button><button type="button" onclick="hideGoalForm()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition">Cancel</button></div></form></div><div class="bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-900 mb-4">Active Goals (${activeGoals.length})</h2>${activeGoals.length > 0 ? activeGoals.map(goal => { const cat = GOAL_CATEGORIES.find(c => c.value === goal.category); const progress = Math.min((goal.currentValue / goal.targetValue) * 100, 100); const isOverdue = goal.deadline && new Date(goal.deadline) < new Date(); return `<div class="p-4 rounded-lg mb-4 ${isOverdue ? 'bg-red-50' : 'bg-gray-50'}"><div class="flex items-start justify-between mb-3"><div class="flex items-center gap-3">${cat ? `<span class="text-2xl">${cat.emoji}</span>` : ''}<div><p class="text-gray-900 font-medium">${goal.title}</p><p class="text-sm text-gray-500">${goal.currentValue} / ${goal.targetValue} ${goal.unit}</p></div></div>${goal.deadline ? `<span class="text-xs px-2 py-1 rounded-full ${isOverdue ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-600'}"><i class="far fa-calendar mr-1"></i>${new Date(goal.deadline).toLocaleDateString()}</span>` : ''}</div><div class="mb-3"><div class="h-2 bg-gray-200 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-orange-400 to-orange-600 transition-all" style="width: ${progress}%"></div></div><p class="text-xs text-gray-500 mt-1">${Math.round(progress)}% complete</p></div><div class="flex items-center gap-2"><input type="number" value="${goal.currentValue}" onchange="updateGoalProgress('${goal.id}', this.value)" class="w-24 px-3 py-1 text-sm border border-gray-300 rounded-lg" min="0" style="color: #111827 !important;"><span class="text-sm text-gray-500">${goal.unit}</span><button onclick="completeGoal('${goal.id}')" class="ml-auto text-sm text-orange-600 hover:text-orange-700 font-medium">Mark Complete</button></div></div>`; }).join('') : '<div class="text-center py-8"><i class="fas fa-bullseye text-4xl text-gray-300 mb-3"></i><p class="text-gray-500">No active goals. Set your first goal above!</p></div>'}</div>${completedGoals.length > 0 ? `<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-lg font-semibold text-gray-900 mb-4">Completed (${completedGoals.length})</h2>${completedGoals.map(goal => `<div class="flex items-center gap-4 p-4 bg-green-50 rounded-lg mb-2"><div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center"><i class="fas fa-check text-green-600"></i></div><div class="flex-1"><p class="text-gray-500 line-through">${goal.title}</p><p class="text-sm text-gray-400">Achieved: ${goal.targetValue} ${goal.unit}</p></div><button onclick="deleteGoal('${goal.id}')" class="text-gray-400 hover:text-red-500 transition p-2"><i class="fas fa-trash"></i></button></div>`).join('')}</div>` : ''}</main></div>`;
     }
 
-    // ============ EVENT HANDLERS ============
     function attachEventListeners() {
-      const loginForm = document.getElementById('loginForm');
-      if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const email = document.getElementById('loginEmail').value;
-          const password = document.getElementById('loginPassword').value;
-          if (email && password.length >= 6) {
-            user = { id: generateId(), email, name: email.split('@')[0] };
-            Storage.set(STORAGE_KEYS.USER, user);
-            navigate('dashboard');
-          } else {
-            document.getElementById('loginError').textContent = 'Invalid credentials';
-            document.getElementById('loginError').classList.remove('hidden');
-          }
-        });
-      }
-
-      document.getElementById('showRegister')?.addEventListener('click', () => {
-        document.getElementById('registerForm').classList.remove('hidden');
-        document.getElementById('loginForm').classList.add('hidden');
-      });
-
-      document.getElementById('showLogin')?.addEventListener('click', () => {
-        document.getElementById('registerForm').classList.add('hidden');
-        document.getElementById('loginForm').classList.remove('hidden');
-      });
-
-      document.getElementById('registerBtn')?.addEventListener('click', () => {
-        const email = document.getElementById('loginEmail').value;
-        const name = document.getElementById('registerName').value;
-        const password = document.getElementById('loginPassword').value;
-        if (email && password.length >= 6 && name) {
-          user = { id: generateId(), email, name };
-          Storage.set(STORAGE_KEYS.USER, user);
-          navigate('dashboard');
-        }
-      });
-
-      document.getElementById('guestLogin')?.addEventListener('click', () => {
-        user = { id: generateId(), email: 'guest@example.com', name: 'Guest User' };
-        Storage.set(STORAGE_KEYS.USER, user);
-        navigate('dashboard');
-      });
-
-      document.getElementById('togglePassword')?.addEventListener('click', () => {
-        const input = document.getElementById('loginPassword');
-        const icon = document.querySelector('#togglePassword i');
-        if (input.type === 'password') {
-          input.type = 'text';
-          icon.className = 'fas fa-eye-slash';
-        } else {
-          input.type = 'password';
-          icon.className = 'fas fa-eye';
-        }
-      });
-
-      document.getElementById('logoutBtn')?.addEventListener('click', () => {
-        Storage.set(STORAGE_KEYS.USER, null);
-        user = null;
-        navigate('login');
-      });
-
-      document.getElementById('newTaskForm')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const task = {
-          id: generateId(),
-          title: document.getElementById('taskTitle').value,
-          description: document.getElementById('taskDesc').value,
-          priority: document.getElementById('taskPriority').value,
-          category: document.getElementById('taskCategory').value,
-          dueDate: document.getElementById('taskDueDate').value,
-          completed: false,
-          createdAt: new Date().toISOString()
-        };
-        tasks.push(task);
-        Storage.set(STORAGE_KEYS.TASKS, tasks);
-        render();
-      });
-
-      document.getElementById('newHabitForm')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const habit = {
-          id: generateId(),
-          name: document.getElementById('habitName').value,
-          emoji: document.getElementById('habitEmoji').value,
-          color: document.getElementById('habitColor').value,
-          createdAt: new Date().toISOString()
-        };
-        habits.push(habit);
-        Storage.set(STORAGE_KEYS.HABITS, habits);
-        render();
-      });
-
-      document.getElementById('newDietForm')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const entry = {
-          id: generateId(),
-          mealType: document.getElementById('mealType').value,
-          foodName: document.getElementById('foodName').value,
-          calories: parseInt(document.getElementById('foodCalories').value) || 0,
-          protein: parseFloat(document.getElementById('foodProtein').value) || 0,
-          carbs: parseFloat(document.getElementById('foodCarbs').value) || 0,
-          fat: parseFloat(document.getElementById('foodFat').value) || 0,
-          water: parseInt(document.getElementById('foodWater').value) || 0,
-          date: getToday()
-        };
-        dietEntries.push(entry);
-        Storage.set(STORAGE_KEYS.DIET, dietEntries);
-        render();
-      });
-
-      document.getElementById('newGoalForm')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const goal = {
-          id: generateId(),
-          title: document.getElementById('goalTitle').value,
-          targetValue: parseFloat(document.getElementById('goalTarget').value) || 0,
-          currentValue: parseFloat(document.getElementById('goalCurrent').value) || 0,
-          unit: document.getElementById('goalUnit').value,
-          deadline: document.getElementById('goalDeadline').value,
-          completed: false,
-          createdAt: new Date().toISOString()
-        };
-        goals.push(goal);
-        Storage.set(STORAGE_KEYS.GOALS, goals);
-        render();
-      });
+      document.getElementById('loginForm')?.addEventListener('submit', (e) => { e.preventDefault(); const email = document.getElementById('loginEmail').value; const password = document.getElementById('loginPassword').value; if (email && password.length >= 6) { user = { id: generateId(), email, name: email.split('@')[0] }; Storage.set(STORAGE_KEYS.USER, user); navigate('dashboard'); } else { document.getElementById('loginError').textContent = 'Invalid credentials'; document.getElementById('loginError').classList.remove('hidden'); } });
+      document.getElementById('showRegister')?.addEventListener('click', () => { document.getElementById('registerForm').classList.remove('hidden'); document.getElementById('loginForm').classList.add('hidden'); });
+      document.getElementById('showLogin')?.addEventListener('click', () => { document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); });
+      document.getElementById('registerBtn')?.addEventListener('click', () => { const email = document.getElementById('loginEmail').value; const name = document.getElementById('registerName').value; const password = document.getElementById('loginPassword').value; if (email && password.length >= 6 && name) { user = { id: generateId(), email, name }; Storage.set(STORAGE_KEYS.USER, user); navigate('dashboard'); } });
+      document.getElementById('guestLogin')?.addEventListener('click', () => { user = { id: generateId(), email: 'guest@example.com', name: 'Guest User' }; Storage.set(STORAGE_KEYS.USER, user); navigate('dashboard'); });
+      document.getElementById('togglePassword')?.addEventListener('click', () => { const input = document.getElementById('loginPassword'); const icon = document.querySelector('#togglePassword i'); input.type = input.type === 'password' ? 'text' : 'password'; icon.className = input.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash'; });
+      document.getElementById('logoutBtn')?.addEventListener('click', () => { Storage.set(STORAGE_KEYS.USER, null); user = null; navigate('login'); });
+      document.getElementById('newTaskForm')?.addEventListener('submit', (e) => { e.preventDefault(); tasks.push({ id: generateId(), title: document.getElementById('taskTitle').value, description: document.getElementById('taskDesc').value, priority: document.getElementById('taskPriority').value, category: document.getElementById('taskCategory').value, dueDate: document.getElementById('taskDueDate').value, completed: false, createdAt: new Date().toISOString() }); Storage.set(STORAGE_KEYS.TASKS, tasks); render(); });
+      document.getElementById('newHabitForm')?.addEventListener('submit', (e) => { e.preventDefault(); habits.push({ id: generateId(), name: document.getElementById('habitName').value, emoji: document.getElementById('habitEmoji').value, color: document.getElementById('habitColor').value, createdAt: new Date().toISOString() }); Storage.set(STORAGE_KEYS.HABITS, habits); render(); });
+      document.getElementById('newDietForm')?.addEventListener('submit', (e) => { e.preventDefault(); dietEntries.push({ id: generateId(), mealType: document.getElementById('mealType').value, foodName: document.getElementById('foodName').value, calories: parseInt(document.getElementById('foodCalories').value) || 0, protein: parseFloat(document.getElementById('foodProtein').value) || 0, carbs: parseFloat(document.getElementById('foodCarbs').value) || 0, fat: parseFloat(document.getElementById('foodFat').value) || 0, water: parseInt(document.getElementById('foodWater').value) || 0, date: getToday() }); Storage.set(STORAGE_KEYS.DIET, dietEntries); render(); });
+      document.getElementById('newGoalForm')?.addEventListener('submit', (e) => { e.preventDefault(); goals.push({ id: generateId(), title: document.getElementById('goalTitle').value, targetValue: parseFloat(document.getElementById('goalTarget').value) || 0, currentValue: parseFloat(document.getElementById('goalCurrent').value) || 0, unit: document.getElementById('goalUnit').value, deadline: document.getElementById('goalDeadline').value, completed: false, createdAt: new Date().toISOString() }); Storage.set(STORAGE_KEYS.GOALS, goals); render(); });
     }
 
-    // ============ ACTIONS ============
-    function toggleTask(id) {
-      const task = tasks.find(t => t.id === id);
-      if (task) {
-        task.completed = !task.completed;
-        Storage.set(STORAGE_KEYS.TASKS, tasks);
-        render();
-      }
-    }
+    function toggleTask(id) { const task = tasks.find(t => t.id === id); if (task) { task.completed = !task.completed; Storage.set(STORAGE_KEYS.TASKS, tasks); render(); } }
+    function deleteTask(id) { if (confirm('Delete this task?')) { tasks = tasks.filter(t => t.id !== id); Storage.set(STORAGE_KEYS.TASKS, tasks); render(); } }
+    function toggleHabit(id) { const today = getToday(); const existingIndex = habitLogs.findIndex(l => l.habitId === id && l.date === today); if (existingIndex !== -1) habitLogs.splice(existingIndex, 1); else habitLogs.push({ id: generateId(), habitId: id, date: today }); Storage.set(STORAGE_KEYS.HABIT_LOGS, habitLogs); render(); }
+    function deleteHabit(id) { if (confirm('Delete this habit?')) { habits = habits.filter(h => h.id !== id); Storage.set(STORAGE_KEYS.HABITS, habits); render(); } }
+    function deleteDietEntry(id) { if (confirm('Delete this entry?')) { dietEntries = dietEntries.filter(e => e.id !== id); Storage.set(STORAGE_KEYS.DIET, dietEntries); render(); } }
+    function deleteGoal(id) { if (confirm('Delete this goal?')) { goals = goals.filter(g => g.id !== id); Storage.set(STORAGE_KEYS.GOALS, goals); render(); } }
+    function completeGoal(id) { const goal = goals.find(g => g.id === id); if (goal) { goal.currentValue = goal.targetValue; goal.completed = true; Storage.set(STORAGE_KEYS.GOALS, goals); render(); } }
+    function updateGoalProgress(id, value) { const goal = goals.find(g => g.id === id); if (goal) { goal.currentValue = parseFloat(value) || 0; if (goal.currentValue >= goal.targetValue) goal.completed = true; Storage.set(STORAGE_KEYS.GOALS, goals); render(); } }
 
-    function deleteTask(id) {
-      if (confirm('Delete this task?')) {
-        tasks = tasks.filter(t => t.id !== id);
-        Storage.set(STORAGE_KEYS.TASKS, tasks);
-        render();
-      }
-    }
-
-    function toggleHabit(id) {
-      const today = getToday();
-      const existingIndex = habitLogs.findIndex(l => l.habitId === id && l.date === today);
-      if (existingIndex !== -1) {
-        habitLogs.splice(existingIndex, 1);
-      } else {
-        habitLogs.push({ id: generateId(), habitId: id, date: today });
-      }
-      Storage.set(STORAGE_KEYS.HABIT_LOGS, habitLogs);
-      render();
-    }
-
-    function deleteHabit(id) {
-      if (confirm('Delete this habit?')) {
-        habits = habits.filter(h => h.id !== id);
-        Storage.set(STORAGE_KEYS.HABITS, habits);
-        render();
-      }
-    }
-
-    function deleteDietEntry(id) {
-      if (confirm('Delete this entry?')) {
-        dietEntries = dietEntries.filter(e => e.id !== id);
-        Storage.set(STORAGE_KEYS.DIET, dietEntries);
-        render();
-      }
-    }
-
-    function deleteGoal(id) {
-      if (confirm('Delete this goal?')) {
-        goals = goals.filter(g => g.id !== id);
-        Storage.set(STORAGE_KEYS.GOALS, goals);
-        render();
-      }
-    }
-
-    function completeGoal(id) {
-      const goal = goals.find(g => g.id === id);
-      if (goal) {
-        goal.currentValue = goal.targetValue;
-        goal.completed = true;
-        Storage.set(STORAGE_KEYS.GOALS, goals);
-        render();
-      }
-    }
-
-    function updateGoalProgress(id, value) {
-      const goal = goals.find(g => g.id === id);
-      if (goal) {
-        goal.currentValue = parseFloat(value) || 0;
-        if (goal.currentValue >= goal.targetValue) {
-          goal.completed = true;
-        }
-        Storage.set(STORAGE_KEYS.GOALS, goals);
-        render();
-      }
-    }
-
-    // ============ FORM TOGGLES ============
     function showTaskForm() { document.getElementById('taskForm').classList.remove('hidden'); }
     function hideTaskForm() { document.getElementById('taskForm').classList.add('hidden'); }
     function showHabitForm() { document.getElementById('habitForm').classList.remove('hidden'); }
@@ -1156,51 +146,13 @@
     function showGoalForm() { document.getElementById('goalForm').classList.remove('hidden'); }
     function hideGoalForm() { document.getElementById('goalForm').classList.add('hidden'); }
 
-    function selectEmoji(emoji) {
-      document.querySelectorAll('.emoji-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-green-500', 'bg-green-100'));
-      document.querySelector(`[data-emoji="${emoji}"]`).classList.add('ring-2', 'ring-green-500', 'bg-green-100');
-      document.getElementById('habitEmoji').value = emoji;
-    }
-
-    function selectColor(color) {
-      document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-offset-2', 'ring-gray-400'));
-      document.querySelector(`[data-color="${color}"]`).classList.add('ring-2', 'ring-offset-2', 'ring-gray-400');
-      document.getElementById('habitColor').value = color;
-    }
-
-    function selectMealType(type) {
-      document.querySelectorAll('.meal-btn').forEach(btn => btn.classList.remove('border-purple-500', 'bg-purple-50'));
-      document.querySelector(`[data-meal="${type}"]`).classList.add('border-purple-500', 'bg-purple-50');
-      document.getElementById('mealType').value = type;
-    }
-
-    function selectTaskCategory(category) {
-      document.querySelectorAll('#taskForm .category-btn').forEach(btn => btn.classList.remove('border-blue-500', 'bg-blue-50'));
-      document.querySelector(`#taskForm [data-category="${category}"]`).classList.add('border-blue-500', 'bg-blue-50');
-      document.getElementById('taskCategory').value = category;
-    }
-
-    function selectGoalCategory(category) {
-      document.querySelectorAll('#goalForm .category-btn').forEach(btn => btn.classList.remove('border-orange-500', 'bg-orange-50'));
-      document.querySelector(`#goalForm [data-category="${category}"]`).classList.add('border-orange-500', 'bg-orange-50');
-    }
-
-    function applyHabitPreset(name, emoji, color) {
-      document.getElementById('habitName').value = name;
-      document.getElementById('habitEmoji').value = emoji;
-      document.getElementById('habitColor').value = color;
-      selectEmoji(emoji);
-      selectColor(color);
-    }
-
-    function applyDietPreset(name, mealType, calories, protein, carbs, fat) {
-      document.getElementById('foodName').value = name;
-      document.getElementById('foodCalories').value = calories;
-      document.getElementById('foodProtein').value = protein;
-      document.getElementById('foodCarbs').value = carbs;
-      document.getElementById('foodFat').value = fat;
-      selectMealType(mealType);
-    }
+    function selectEmoji(emoji) { document.querySelectorAll('.emoji-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-green-500', 'bg-green-100')); document.querySelector(`[data-emoji="${emoji}"]`).classList.add('ring-2', 'ring-green-500', 'bg-green-100'); document.getElementById('habitEmoji').value = emoji; }
+    function selectColor(color) { document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-offset-2', 'ring-gray-400')); document.querySelector(`[data-color="${color}"]`).classList.add('ring-2', 'ring-offset-2', 'ring-gray-400'); document.getElementById('habitColor').value = color; }
+    function selectMealType(type) { document.querySelectorAll('.meal-btn').forEach(btn => btn.classList.remove('border-purple-500', 'bg-purple-50')); document.querySelector(`[data-meal="${type}"]`).classList.add('border-purple-500', 'bg-purple-50'); document.getElementById('mealType').value = type; }
+    function selectTaskCategory(category) { document.querySelectorAll('#taskForm .category-btn').forEach(btn => btn.classList.remove('border-blue-500', 'bg-blue-50')); document.querySelector(`#taskForm [data-category="${category}"]`).classList.add('border-blue-500', 'bg-blue-50'); document.getElementById('taskCategory').value = category; }
+    function selectGoalCategory(category) { document.querySelectorAll('#goalForm .category-btn').forEach(btn => btn.classList.remove('border-orange-500', 'bg-orange-50')); document.querySelector(`#goalForm [data-category="${category}"]`).classList.add('border-orange-500', 'bg-orange-50'); }
+    function applyHabitPreset(name, emoji, color) { document.getElementById('habitName').value = name; document.getElementById('habitEmoji').value = emoji; document.getElementById('habitColor').value = color; selectEmoji(emoji); selectColor(color); }
+    function applyDietPreset(name, mealType, calories, protein, carbs, fat) { document.getElementById('foodName').value = name; document.getElementById('foodCalories').value = calories; document.getElementById('foodProtein').value = protein; document.getElementById('foodCarbs').value = carbs; document.getElementById('foodFat').value = fat; selectMealType(mealType); }
 
     render();
   </script>
