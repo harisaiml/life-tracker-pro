@@ -8,11 +8,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    input, textarea, select { color: #111827 !important; }
+    input::placeholder, textarea::placeholder { color: #9ca3af !important; }
     .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     .habit-btn { transition: all 0.2s ease; }
     .habit-btn:hover { transform: scale(1.05); }
-    .progress-ring { transition: stroke-dashoffset 0.5s ease; }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -50,6 +51,55 @@
     function getToday() {
       return new Date().toISOString().split('T')[0];
     }
+
+    // ============ CATEGORIES & PRESETS ============
+    const TASK_CATEGORIES = [
+      { value: 'work', label: 'Work', icon: '💼', color: 'bg-blue-100 text-blue-700' },
+      { value: 'personal', label: 'Personal', icon: '🏠', color: 'bg-purple-100 text-purple-700' },
+      { value: 'health', label: 'Health', icon: '❤️', color: 'bg-red-100 text-red-700' },
+      { value: 'study', label: 'Study', icon: '📚', color: 'bg-amber-100 text-amber-700' },
+      { value: 'shopping', label: 'Shopping', icon: '🛒', color: 'bg-pink-100 text-pink-700' },
+      { value: 'finance', label: 'Finance', icon: '💰', color: 'bg-green-100 text-green-700' },
+      { value: 'fitness', label: 'Fitness', icon: '💪', color: 'bg-orange-100 text-orange-700' },
+      { value: 'creative', label: 'Creative', icon: '🎨', color: 'bg-indigo-100 text-indigo-700' },
+      { value: 'social', label: 'Social', icon: '👥', color: 'bg-cyan-100 text-cyan-700' },
+      { value: 'errands', label: 'Errands', icon: '📝', color: 'bg-gray-100 text-gray-700' }
+    ];
+
+    const HABIT_PRESETS = [
+      { name: 'Morning Exercise', emoji: '🏃', color: '#f59e0b' },
+      { name: 'Read 30 Minutes', emoji: '📖', color: '#3b82f6' },
+      { name: 'Drink 8 Glasses Water', emoji: '💧', color: '#06b6d4' },
+      { name: 'Meditate 10 Minutes', emoji: '🧘', color: '#8b5cf6' },
+      { name: 'No Social Media', emoji: '📵', color: '#ef4444' },
+      { name: 'Sleep Before 11 PM', emoji: '😴', color: '#6366f1' },
+      { name: 'Eat Healthy Breakfast', emoji: '🥗', color: '#10b981' },
+      { name: 'Learn New Skill', emoji: '🧠', color: '#ec4899' },
+      { name: 'Practice Gratitude', emoji: '🙏', color: '#84cc16' },
+      { name: 'Stretch for 15 Minutes', emoji: '🤸', color: '#f97316' },
+      { name: 'Write in Journal', emoji: '✍️', color: '#14b8a6' },
+      { name: 'Take Vitamins', emoji: '💊', color: '#a855f7' }
+    ];
+
+    const DIET_PRESETS = [
+      { name: 'Grilled Chicken Salad', mealType: 'lunch', calories: 350, protein: 35, carbs: 15, fat: 15 },
+      { name: 'Oatmeal with Berries', mealType: 'breakfast', calories: 280, protein: 8, carbs: 50, fat: 5 },
+      { name: 'Salmon with Vegetables', mealType: 'dinner', calories: 450, protein: 40, carbs: 20, fat: 22 },
+      { name: 'Greek Yogurt Parfait', mealType: 'snack', calories: 180, protein: 15, carbs: 25, fat: 3 },
+      { name: 'Protein Smoothie', mealType: 'breakfast', calories: 320, protein: 30, carbs: 35, fat: 8 },
+      { name: 'Quinoa Buddha Bowl', mealType: 'lunch', calories: 420, protein: 15, carbs: 60, fat: 15 }
+    ];
+
+    const GOAL_CATEGORIES = [
+      { value: 'fitness', label: 'Fitness', emoji: '💪', color: 'bg-orange-100' },
+      { value: 'career', label: 'Career', emoji: '💼', color: 'bg-blue-100' },
+      { value: 'education', label: 'Education', emoji: '📚', color: 'bg-amber-100' },
+      { value: 'finance', label: 'Finance', emoji: '💰', color: 'bg-green-100' },
+      { value: 'health', label: 'Health', emoji: '❤️', color: 'bg-red-100' },
+      { value: 'personal', label: 'Personal', emoji: '🌱', color: 'bg-emerald-100' },
+      { value: 'creative', label: 'Creative', emoji: '🎨', color: 'bg-pink-100' },
+      { value: 'relationships', label: 'Relationships', emoji: '👨‍👩‍👧', color: 'bg-purple-100' }
+    ];
 
     // ============ STATE ============
     let currentPage = 'login';
@@ -104,7 +154,7 @@
                   <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                   <input type="email" id="loginEmail" required
                     class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="you@example.com">
+                    placeholder="you@example.com" style="color: #111827 !important;">
                 </div>
               </div>
               <div>
@@ -113,7 +163,7 @@
                   <i class="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                   <input type="password" id="loginPassword" required minlength="6"
                     class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Min 6 characters">
+                    placeholder="Min 6 characters" style="color: #111827 !important;">
                   <button type="button" id="togglePassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                     <i class="fas fa-eye"></i>
                   </button>
@@ -137,7 +187,7 @@
                   <i class="fas fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                   <input type="text" id="registerName" required
                     class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="John Doe">
+                    placeholder="John Doe" style="color: #111827 !important;">
                 </div>
               </div>
               <button type="button" id="showLogin"
@@ -172,7 +222,6 @@
 
       return `
         <div class="min-h-screen bg-gray-50">
-          <!-- Header -->
           <header class="bg-white shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
               <div class="flex items-center justify-between">
@@ -199,9 +248,7 @@
             </div>
           </header>
 
-          <!-- Main Content -->
           <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Stats -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               ${renderStatCard('fa-check-circle', 'Tasks Today', `${completedTasks}/${todayTasks.length}`, 'blue')}
               ${renderStatCard('fa-trophy', 'Habits Done', `${todayHabitsDone}/${habits.length}`, 'green')}
@@ -209,7 +256,6 @@
               ${renderStatCard('fa-fire', 'Calories', `${totalCalories}/2000`, 'orange')}
             </div>
 
-            <!-- Navigation -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <button onclick="navigate('tasks')"
                 class="bg-blue-50 hover:bg-blue-100 rounded-xl p-4 transition text-blue-600">
@@ -237,36 +283,36 @@
               </button>
             </div>
 
-            <!-- Today's Tasks & Habits -->
             <div class="grid lg:grid-cols-2 gap-6">
-              <!-- Tasks -->
               <div class="bg-white rounded-xl shadow-sm p-6">
                 <div class="flex items-center justify-between mb-4">
                   <h2 class="text-lg font-semibold text-gray-900">Today's Tasks</h2>
                   <button onclick="navigate('tasks')" class="text-blue-600 hover:text-blue-700 text-sm font-medium">View All →</button>
                 </div>
-                ${todayTasks.length > 0 ? todayTasks.slice(0, 5).map(task => `
-                  <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-2">
-                    <button onclick="toggleTask('${task.id}')"
-                      class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition ${task.completed ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 hover:border-blue-500'}">
-                      ${task.completed ? '<i class="fas fa-check text-xs"></i>' : ''}
-                    </button>
-                    <div class="flex-1">
-                      <p class="text-gray-900 ${task.completed ? 'line-through text-gray-500' : ''}">${task.title}</p>
+                ${todayTasks.length > 0 ? todayTasks.slice(0, 5).map(task => {
+                  const cat = TASK_CATEGORIES.find(c => c.value === task.category);
+                  return `
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-2">
+                      <button onclick="toggleTask('${task.id}')"
+                        class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition ${task.completed ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 hover:border-blue-500'}">
+                        ${task.completed ? '<i class="fas fa-check text-xs"></i>' : ''}
+                      </button>
+                      <div class="flex-1">
+                        <p class="text-gray-900 ${task.completed ? 'line-through text-gray-500' : ''}">${task.title}</p>
+                      </div>
+                      ${cat ? `<span class="text-xs px-2 py-1 rounded-full ${cat.color}">${cat.icon} ${cat.label}</span>` : ''}
+                      <span class="text-xs px-2 py-1 rounded-full ${task.priority === 'high' ? 'bg-red-100 text-red-700' : task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'}">
+                        ${task.priority}
+                      </span>
                     </div>
-                    <span class="text-xs px-2 py-1 rounded-full ${task.priority === 'high' ? 'bg-red-100 text-red-700' : task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'}">
-                      ${task.priority}
-                    </span>
-                  </div>
-                `).join('') : `
-                  <div class="text-center py-8">
-                    <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
-                    <p class="text-gray-500">No tasks for today</p>
-                  </div>
-                `}
+                  `}).join('') : `
+                    <div class="text-center py-8">
+                      <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
+                      <p class="text-gray-500">No tasks for today</p>
+                    </div>
+                  `}
               </div>
 
-              <!-- Habits -->
               <div class="bg-white rounded-xl shadow-sm p-6">
                 <div class="flex items-center justify-between mb-4">
                   <h2 class="text-lg font-semibold text-gray-900">Today's Habits</h2>
@@ -286,13 +332,12 @@
                       </div>
                       ${isDone ? '<i class="fas fa-check-circle text-green-500"></i>' : ''}
                     </div>
-                  `;
-                }).join('') : `
-                  <div class="text-center py-8">
-                    <i class="fas fa-star text-4xl text-gray-300 mb-3"></i>
-                    <p class="text-gray-500">No habits tracked yet</p>
-                  </div>
-                `}
+                  `}).join('') : `
+                    <div class="text-center py-8">
+                      <i class="fas fa-star text-4xl text-gray-300 mb-3"></i>
+                      <p class="text-gray-500">No habits tracked yet</p>
+                    </div>
+                  `}
               </div>
             </div>
           </main>
@@ -353,34 +398,41 @@
                   <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
                   <input type="text" id="taskTitle" required
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter task title">
+                    placeholder="Enter task title" style="color: #111827 !important;">
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
                   <textarea id="taskDesc" rows="2"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Task description (optional)"></textarea>
+                    placeholder="Task description (optional)" style="color: #111827 !important;"></textarea>
                 </div>
-                <div class="grid grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                  <div class="grid grid-cols-5 gap-2">
+                    ${TASK_CATEGORIES.map(cat => `
+                      <button type="button" onclick="selectTaskCategory('${cat.value}')"
+                        class="p-2 rounded-lg border-2 transition text-center category-btn" data-category="${cat.value}">
+                        <span class="text-xl">${cat.icon}</span>
+                        <p class="text-xs mt-1 text-gray-700">${cat.label}</p>
+                      </button>
+                    `).join('')}
+                  </div>
+                  <input type="hidden" id="taskCategory" value="">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
                     <select id="taskPriority"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" style="color: #111827 !important;">
                       <option value="low">Low</option>
                       <option value="medium" selected>Medium</option>
                       <option value="high">High</option>
                     </select>
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <input type="text" id="taskCategory"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="e.g., Work">
-                  </div>
-                  <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
                     <input type="date" id="taskDueDate"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" style="color: #111827 !important;">
                   </div>
                 </div>
                 <div class="flex gap-3">
@@ -392,48 +444,50 @@
               </form>
             </div>
 
-            <!-- Active Tasks -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
               <h2 class="text-lg font-semibold text-gray-900 mb-4">Active Tasks (${incompleteTasks.length})</h2>
-              ${incompleteTasks.length > 0 ? incompleteTasks.map(task => `
-                <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg mb-2">
-                  <button onclick="toggleTask('${task.id}')"
-                    class="w-6 h-6 rounded-full border-2 border-gray-300 hover:border-blue-500 flex items-center justify-center transition">
-                  </button>
-                  <div class="flex-1">
-                    <p class="text-gray-900 font-medium">${task.title}</p>
-                    ${task.description ? `<p class="text-gray-500 text-sm">${task.description}</p>` : ''}
-                    <div class="flex items-center gap-3 mt-2">
-                      <span class="text-xs px-2 py-1 rounded-full ${task.priority === 'high' ? 'bg-red-100 text-red-700' : task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'}">${task.priority}</span>
-                      ${task.category ? `<span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700"><i class="fas fa-tag mr-1"></i>${task.category}</span>` : ''}
-                      ${task.dueDate ? `<span class="text-xs text-gray-500"><i class="far fa-calendar mr-1"></i>${new Date(task.dueDate).toLocaleDateString()}</span>` : ''}
-                    </div>
-                  </div>
-                  <button onclick="deleteTask('${task.id}')" class="text-gray-400 hover:text-red-500 transition p-2">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              `).join('') : '<p class="text-gray-500 text-center py-8">No active tasks. Create one above!</p>'}
-            </div>
-
-            <!-- Completed Tasks -->
-            ${completedTasks.length > 0 ? `
-              <div class="bg-white rounded-xl shadow-sm p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Completed (${completedTasks.length})</h2>
-                ${completedTasks.map(task => `
-                  <div class="flex items-center gap-4 p-4 bg-green-50 rounded-lg mb-2">
+              ${incompleteTasks.length > 0 ? incompleteTasks.map(task => {
+                const cat = TASK_CATEGORIES.find(c => c.value === task.category);
+                return `
+                  <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg mb-2">
                     <button onclick="toggleTask('${task.id}')"
-                      class="w-6 h-6 rounded-full bg-green-500 border-2 border-green-500 flex items-center justify-center text-white">
-                      <i class="fas fa-check text-xs"></i>
+                      class="w-6 h-6 rounded-full border-2 border-gray-300 hover:border-blue-500 flex items-center justify-center transition">
                     </button>
                     <div class="flex-1">
-                      <p class="text-gray-500 line-through">${task.title}</p>
+                      <p class="text-gray-900 font-medium">${task.title}</p>
+                      ${task.description ? `<p class="text-gray-500 text-sm">${task.description}</p>` : ''}
+                      <div class="flex items-center gap-3 mt-2">
+                        ${cat ? `<span class="text-xs px-2 py-1 rounded-full ${cat.color}">${cat.icon} ${cat.label}</span>` : ''}
+                        <span class="text-xs px-2 py-1 rounded-full ${task.priority === 'high' ? 'bg-red-100 text-red-700' : task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'}">${task.priority}</span>
+                        ${task.dueDate ? `<span class="text-xs text-gray-500"><i class="far fa-calendar mr-1"></i>${new Date(task.dueDate).toLocaleDateString()}</span>` : ''}
+                      </div>
                     </div>
                     <button onclick="deleteTask('${task.id}')" class="text-gray-400 hover:text-red-500 transition p-2">
                       <i class="fas fa-trash"></i>
                     </button>
                   </div>
-                `).join('')}
+                `}).join('') : '<p class="text-gray-500 text-center py-8">No active tasks. Create one above!</p>'}
+            </div>
+
+            ${completedTasks.length > 0 ? `
+              <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Completed (${completedTasks.length})</h2>
+                ${completedTasks.map(task => {
+                  const cat = TASK_CATEGORIES.find(c => c.value === task.category);
+                  return `
+                    <div class="flex items-center gap-4 p-4 bg-green-50 rounded-lg mb-2">
+                      <button onclick="toggleTask('${task.id}')"
+                        class="w-6 h-6 rounded-full bg-green-500 border-2 border-green-500 flex items-center justify-center text-white">
+                        <i class="fas fa-check text-xs"></i>
+                      </button>
+                      <div class="flex-1">
+                        <p class="text-gray-500 line-through">${task.title}</p>
+                      </div>
+                      <button onclick="deleteTask('${task.id}')" class="text-gray-400 hover:text-red-500 transition p-2">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  `}).join('')}
               </div>
             ` : ''}
           </main>
@@ -472,15 +526,27 @@
               <h2 class="text-lg font-semibold text-gray-900 mb-4">Create New Habit</h2>
               <form id="newHabitForm" class="space-y-4">
                 <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Quick Add Presets</label>
+                  <div class="grid grid-cols-4 gap-2 mb-4">
+                    ${HABIT_PRESETS.slice(0, 8).map(preset => `
+                      <button type="button" onclick="applyHabitPreset('${preset.name}', '${preset.emoji}', '${preset.color}')"
+                        class="p-2 rounded-lg border border-gray-200 hover:border-green-500 transition text-center">
+                        <span class="text-xl">${preset.emoji}</span>
+                        <p class="text-xs mt-1 text-gray-700 truncate">${preset.name}</p>
+                      </button>
+                    `).join('')}
+                  </div>
+                </div>
+                <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Habit Name</label>
                   <input type="text" id="habitName" required
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                    placeholder="e.g., Morning Exercise">
+                    placeholder="e.g., Morning Exercise" style="color: #111827 !important;">
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Choose Emoji</label>
                   <div class="flex flex-wrap gap-2" id="emojiOptions">
-                    ${['💪','📚','🏃','💧','🧘','😴','🥗','✍️','🎯','🧠','🎨','🎵'].map(e => `
+                    ${['💪','📚','🏃','💧','🧘','😴','🥗','✍️','🎯','🧠','🎨','🎵','💊','🤸','📖','🧹'].map(e => `
                       <button type="button" onclick="selectEmoji('${e}')"
                         class="w-10 h-10 text-xl rounded-lg bg-gray-100 hover:bg-gray-200 transition emoji-btn" data-emoji="${e}">${e}</button>
                     `).join('')}
@@ -506,7 +572,6 @@
               </form>
             </div>
 
-            <!-- Habits List -->
             <div class="bg-white rounded-xl shadow-sm p-6">
               <h2 class="text-lg font-semibold text-gray-900 mb-4">Your Habits</h2>
               ${habits.length > 0 ? habits.map(habit => {
@@ -526,14 +591,13 @@
                       <i class="fas fa-trash"></i>
                     </button>
                   </div>
-                `;
-              }).join('') : `
-                <div class="text-center py-12">
-                  <i class="fas fa-star text-5xl text-gray-300 mb-4"></i>
-                  <p class="text-gray-500 mb-2">No habits created yet</p>
-                  <p class="text-gray-400 text-sm">Start tracking your daily habits!</p>
-                </div>
-              `}
+                `}).join('') : `
+                  <div class="text-center py-12">
+                    <i class="fas fa-star text-5xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 mb-2">No habits created yet</p>
+                    <p class="text-gray-400 text-sm">Start tracking your daily habits!</p>
+                  </div>
+                `}
             </div>
           </main>
         </div>
@@ -572,7 +636,6 @@
           </header>
 
           <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Stats -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <div class="bg-white rounded-xl shadow-sm p-4">
                 <div class="flex items-center gap-3">
@@ -622,6 +685,18 @@
 
             <div id="dietForm" class="hidden bg-white rounded-xl shadow-sm p-6 mb-6">
               <h2 class="text-lg font-semibold text-gray-900 mb-4">Log Food Entry</h2>
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Quick Add Presets</label>
+                <div class="grid grid-cols-3 gap-2">
+                  ${DIET_PRESETS.map(preset => `
+                    <button type="button" onclick="applyDietPreset('${preset.name}', '${preset.mealType}', ${preset.calories}, ${preset.protein}, ${preset.carbs}, ${preset.fat})"
+                      class="p-2 rounded-lg border border-gray-200 hover:border-purple-500 transition text-left">
+                      <p class="text-sm font-medium text-gray-900">${preset.name}</p>
+                      <p class="text-xs text-gray-500">${preset.calories} cal | ${preset.protein}g protein</p>
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
               <form id="newDietForm" class="space-y-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Meal Type</label>
@@ -630,7 +705,7 @@
                       <button type="button" onclick="selectMealType('${m.v}')"
                         class="p-3 rounded-lg border-2 transition meal-btn" data-meal="${m.v}">
                         <span class="text-xl">${m.e}</span>
-                        <p class="text-xs mt-1">${m.l}</p>
+                        <p class="text-xs mt-1 text-gray-700">${m.l}</p>
                       </button>
                     `).join('')}
                   </div>
@@ -640,39 +715,39 @@
                   <label class="block text-sm font-medium text-gray-700 mb-1">Food Name</label>
                   <input type="text" id="foodName" required
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                    placeholder="e.g., Grilled Chicken Salad">
+                    placeholder="e.g., Grilled Chicken Salad" style="color: #111827 !important;">
                 </div>
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Calories</label>
                     <input type="number" id="foodCalories" min="0"
                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                      placeholder="0">
+                      placeholder="0" style="color: #111827 !important;">
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Protein (g)</label>
                     <input type="number" id="foodProtein" min="0" step="0.1"
                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                      placeholder="0">
+                      placeholder="0" style="color: #111827 !important;">
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Carbs (g)</label>
                     <input type="number" id="foodCarbs" min="0" step="0.1"
                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                      placeholder="0">
+                      placeholder="0" style="color: #111827 !important;">
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Fat (g)</label>
                     <input type="number" id="foodFat" min="0" step="0.1"
                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                      placeholder="0">
+                      placeholder="0" style="color: #111827 !important;">
                   </div>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Water (glasses)</label>
                   <input type="number" id="foodWater" min="0"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                    placeholder="0">
+                    placeholder="0" style="color: #111827 !important;">
                 </div>
                 <div class="flex gap-3">
                   <button type="submit"
@@ -683,7 +758,6 @@
               </form>
             </div>
 
-            <!-- Today's Entries -->
             <div class="bg-white rounded-xl shadow-sm p-6">
               <h2 class="text-lg font-semibold text-gray-900 mb-4">Today's Food Log</h2>
               ${todayEntries.length > 0 ? todayEntries.map(entry => {
@@ -705,14 +779,13 @@
                       <i class="fas fa-trash"></i>
                     </button>
                   </div>
-                `;
-              }).join('') : `
-                <div class="text-center py-12">
-                  <i class="fas fa-utensils text-5xl text-gray-300 mb-4"></i>
-                  <p class="text-gray-500 mb-2">No meals logged today</p>
-                  <p class="text-gray-400 text-sm">Start tracking your nutrition!</p>
-                </div>
-              `}
+                `}).join('') : `
+                  <div class="text-center py-12">
+                    <i class="fas fa-utensils text-5xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 mb-2">No meals logged today</p>
+                    <p class="text-gray-400 text-sm">Start tracking your nutrition!</p>
+                  </div>
+                `}
             </div>
           </main>
         </div>
@@ -749,37 +822,49 @@
           <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div id="goalForm" class="hidden bg-white rounded-xl shadow-sm p-6 mb-6">
               <h2 class="text-lg font-semibold text-gray-900 mb-4">Create New Goal</h2>
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Goal Categories</label>
+                <div class="grid grid-cols-4 gap-2">
+                  ${GOAL_CATEGORIES.map(cat => `
+                    <button type="button" onclick="selectGoalCategory('${cat.value}')"
+                      class="p-3 rounded-lg border-2 transition text-center category-btn" data-category="${cat.value}">
+                      <span class="text-2xl">${cat.emoji}</span>
+                      <p class="text-xs mt-1 text-gray-700">${cat.label}</p>
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
               <form id="newGoalForm" class="space-y-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Goal Title</label>
                   <input type="text" id="goalTitle" required
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                    placeholder="e.g., Run a Marathon">
+                    placeholder="e.g., Run a Marathon" style="color: #111827 !important;">
                 </div>
                 <div class="grid grid-cols-3 gap-4">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Target Value</label>
                     <input type="number" id="goalTarget" required min="0"
                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                      placeholder="0">
+                      placeholder="0" style="color: #111827 !important;">
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Current Value</label>
                     <input type="number" id="goalCurrent" min="0"
                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                      placeholder="0">
+                      placeholder="0" style="color: #111827 !important;">
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Unit</label>
                     <input type="text" id="goalUnit"
                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                      placeholder="e.g., km, pages">
+                      placeholder="e.g., km, pages" style="color: #111827 !important;">
                   </div>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
                   <input type="date" id="goalDeadline"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" style="color: #111827 !important;">
                 </div>
                 <div class="flex gap-3">
                   <button type="submit"
@@ -790,18 +875,21 @@
               </form>
             </div>
 
-            <!-- Active Goals -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
               <h2 class="text-lg font-semibold text-gray-900 mb-4">Active Goals (${activeGoals.length})</h2>
               ${activeGoals.length > 0 ? activeGoals.map(goal => {
+                const cat = GOAL_CATEGORIES.find(c => c.value === goal.category);
                 const progress = Math.min((goal.currentValue / goal.targetValue) * 100, 100);
                 const isOverdue = goal.deadline && new Date(goal.deadline) < new Date();
                 return `
                   <div class="p-4 rounded-lg mb-4 ${isOverdue ? 'bg-red-50' : 'bg-gray-50'}">
                     <div class="flex items-start justify-between mb-3">
-                      <div>
-                        <p class="text-gray-900 font-medium">${goal.title}</p>
-                        <p class="text-sm text-gray-500">${goal.currentValue} / ${goal.targetValue} ${goal.unit}</p>
+                      <div class="flex items-center gap-3">
+                        ${cat ? `<span class="text-2xl">${cat.emoji}</span>` : ''}
+                        <div>
+                          <p class="text-gray-900 font-medium">${goal.title}</p>
+                          <p class="text-sm text-gray-500">${goal.currentValue} / ${goal.targetValue} ${goal.unit}</p>
+                        </div>
                       </div>
                       ${goal.deadline ? `<span class="text-xs px-2 py-1 rounded-full ${isOverdue ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-600'}"><i class="far fa-calendar mr-1"></i>${new Date(goal.deadline).toLocaleDateString()}</span>` : ''}
                     </div>
@@ -813,19 +901,18 @@
                     </div>
                     <div class="flex items-center gap-2">
                       <input type="number" value="${goal.currentValue}" onchange="updateGoalProgress('${goal.id}', this.value)"
-                        class="w-24 px-3 py-1 text-sm border border-gray-300 rounded-lg" min="0">
+                        class="w-24 px-3 py-1 text-sm border border-gray-300 rounded-lg" min="0" style="color: #111827 !important;">
                       <span class="text-sm text-gray-500">${goal.unit}</span>
                       <button onclick="completeGoal('${goal.id}')"
                         class="ml-auto text-sm text-orange-600 hover:text-orange-700 font-medium">Mark Complete</button>
                     </div>
                   </div>
-                `;
-              }).join('') : `
-                <div class="text-center py-8">
-                  <i class="fas fa-bullseye text-4xl text-gray-300 mb-3"></i>
-                  <p class="text-gray-500">No active goals. Set your first goal above!</p>
-                </div>
-              `}
+                `}).join('') : `
+                  <div class="text-center py-8">
+                    <i class="fas fa-bullseye text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-500">No active goals. Set your first goal above!</p>
+                  </div>
+                `}
             </div>
 
             ${completedGoals.length > 0 ? `
@@ -854,7 +941,6 @@
 
     // ============ EVENT HANDLERS ============
     function attachEventListeners() {
-      // Login
       const loginForm = document.getElementById('loginForm');
       if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
@@ -917,7 +1003,6 @@
         navigate('login');
       });
 
-      // Task Form
       document.getElementById('newTaskForm')?.addEventListener('submit', (e) => {
         e.preventDefault();
         const task = {
@@ -935,7 +1020,6 @@
         render();
       });
 
-      // Habit Form
       document.getElementById('newHabitForm')?.addEventListener('submit', (e) => {
         e.preventDefault();
         const habit = {
@@ -950,7 +1034,6 @@
         render();
       });
 
-      // Diet Form
       document.getElementById('newDietForm')?.addEventListener('submit', (e) => {
         e.preventDefault();
         const entry = {
@@ -969,7 +1052,6 @@
         render();
       });
 
-      // Goal Form
       document.getElementById('newGoalForm')?.addEventListener('submit', (e) => {
         e.preventDefault();
         const goal = {
@@ -1065,30 +1147,14 @@
     }
 
     // ============ FORM TOGGLES ============
-    function showTaskForm() {
-      document.getElementById('taskForm').classList.remove('hidden');
-    }
-    function hideTaskForm() {
-      document.getElementById('taskForm').classList.add('hidden');
-    }
-    function showHabitForm() {
-      document.getElementById('habitForm').classList.remove('hidden');
-    }
-    function hideHabitForm() {
-      document.getElementById('habitForm').classList.add('hidden');
-    }
-    function showDietForm() {
-      document.getElementById('dietForm').classList.remove('hidden');
-    }
-    function hideDietForm() {
-      document.getElementById('dietForm').classList.add('hidden');
-    }
-    function showGoalForm() {
-      document.getElementById('goalForm').classList.remove('hidden');
-    }
-    function hideGoalForm() {
-      document.getElementById('goalForm').classList.add('hidden');
-    }
+    function showTaskForm() { document.getElementById('taskForm').classList.remove('hidden'); }
+    function hideTaskForm() { document.getElementById('taskForm').classList.add('hidden'); }
+    function showHabitForm() { document.getElementById('habitForm').classList.remove('hidden'); }
+    function hideHabitForm() { document.getElementById('habitForm').classList.add('hidden'); }
+    function showDietForm() { document.getElementById('dietForm').classList.remove('hidden'); }
+    function hideDietForm() { document.getElementById('dietForm').classList.add('hidden'); }
+    function showGoalForm() { document.getElementById('goalForm').classList.remove('hidden'); }
+    function hideGoalForm() { document.getElementById('goalForm').classList.add('hidden'); }
 
     function selectEmoji(emoji) {
       document.querySelectorAll('.emoji-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-green-500', 'bg-green-100'));
@@ -1108,7 +1174,34 @@
       document.getElementById('mealType').value = type;
     }
 
-    // ============ INIT ============
+    function selectTaskCategory(category) {
+      document.querySelectorAll('#taskForm .category-btn').forEach(btn => btn.classList.remove('border-blue-500', 'bg-blue-50'));
+      document.querySelector(`#taskForm [data-category="${category}"]`).classList.add('border-blue-500', 'bg-blue-50');
+      document.getElementById('taskCategory').value = category;
+    }
+
+    function selectGoalCategory(category) {
+      document.querySelectorAll('#goalForm .category-btn').forEach(btn => btn.classList.remove('border-orange-500', 'bg-orange-50'));
+      document.querySelector(`#goalForm [data-category="${category}"]`).classList.add('border-orange-500', 'bg-orange-50');
+    }
+
+    function applyHabitPreset(name, emoji, color) {
+      document.getElementById('habitName').value = name;
+      document.getElementById('habitEmoji').value = emoji;
+      document.getElementById('habitColor').value = color;
+      selectEmoji(emoji);
+      selectColor(color);
+    }
+
+    function applyDietPreset(name, mealType, calories, protein, carbs, fat) {
+      document.getElementById('foodName').value = name;
+      document.getElementById('foodCalories').value = calories;
+      document.getElementById('foodProtein').value = protein;
+      document.getElementById('foodCarbs').value = carbs;
+      document.getElementById('foodFat').value = fat;
+      selectMealType(mealType);
+    }
+
     render();
   </script>
 </body>
