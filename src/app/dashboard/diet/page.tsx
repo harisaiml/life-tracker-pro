@@ -13,9 +13,23 @@ const MEAL_TYPES = [
   { value: 'snack', label: 'Snack', emoji: '🍎' },
 ];
 
+const DIET_PRESETS = [
+  { name: 'Grilled Chicken Salad', mealType: 'lunch' as const, calories: 350, protein: 35, carbs: 15, fat: 15 },
+  { name: 'Oatmeal with Berries', mealType: 'breakfast' as const, calories: 280, protein: 8, carbs: 50, fat: 5 },
+  { name: 'Salmon with Vegetables', mealType: 'dinner' as const, calories: 450, protein: 40, carbs: 20, fat: 22 },
+  { name: 'Greek Yogurt Parfait', mealType: 'breakfast' as const, calories: 220, protein: 15, carbs: 30, fat: 5 },
+  { name: 'Turkey Sandwich', mealType: 'lunch' as const, calories: 380, protein: 25, carbs: 40, fat: 12 },
+  { name: 'Protein Smoothie', mealType: 'snack' as const, calories: 180, protein: 20, carbs: 15, fat: 4 },
+  { name: 'Quinoa Buddha Bowl', mealType: 'lunch' as const, calories: 420, protein: 15, carbs: 60, fat: 14 },
+  { name: 'Scrambled Eggs Toast', mealType: 'breakfast' as const, calories: 350, protein: 18, carbs: 35, fat: 16 },
+  { name: 'Grilled Steak Dinner', mealType: 'dinner' as const, calories: 550, protein: 50, carbs: 10, fat: 35 },
+  { name: 'Mixed Nuts Snack', mealType: 'snack' as const, calories: 170, protein: 5, carbs: 8, fat: 15 },
+];
+
 export default function DietPage() {
   const [entries, setEntries] = useState<DietEntry[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [showPresets, setShowPresets] = useState(false);
   const [newEntry, setNewEntry] = useState({
     mealType: 'breakfast' as DietEntry['mealType'],
     foodName: '',
@@ -53,6 +67,23 @@ export default function DietPage() {
     });
   };
 
+  const handleQuickAdd = (preset: typeof DIET_PRESETS[0]) => {
+    const entry: DietEntry = {
+      id: generateId(),
+      mealType: preset.mealType,
+      foodName: preset.name,
+      calories: preset.calories,
+      protein: preset.protein,
+      carbs: preset.carbs,
+      fat: preset.fat,
+      water: 0,
+      notes: '',
+      date: getTodayDate(),
+    };
+    addDietEntry(entry);
+    setEntries(getDietEntries());
+  };
+
   const handleDelete = (entryId: string) => {
     if (confirm('Are you sure you want to delete this entry?')) {
       deleteDietEntry(entryId);
@@ -85,19 +116,56 @@ export default function DietPage() {
                 <p className="text-sm text-gray-500">Track your nutrition and water intake</p>
               </div>
             </div>
-            <button
-              onClick={() => setShowForm(!showForm)}
-              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition"
-            >
-              <Plus className="w-5 h-5" />
-              Log Meal
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowPresets(!showPresets)}
+                className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition"
+              >
+                <Zap className="w-4 h-4" />
+                Quick Add
+              </button>
+              <button
+                onClick={() => setShowForm(!showForm)}
+                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition"
+              >
+                <Plus className="w-5 h-5" />
+                Log Meal
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Quick Add Presets */}
+        {showPresets && (
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Popular Food Presets</h2>
+              <button onClick={() => setShowPresets(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+              {DIET_PRESETS.map((preset, idx) => {
+                const meal = MEAL_TYPES.find(m => m.value === preset.mealType);
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => handleQuickAdd(preset)}
+                    className="flex flex-col items-center p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition text-center"
+                  >
+                    <span className="text-2xl mb-1">{meal?.emoji}</span>
+                    <span className="text-sm text-gray-900">{preset.name}</span>
+                    <span className="text-xs text-gray-500">{preset.calories} cal</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Nutrition Summary */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-xl shadow-sm p-4">
@@ -185,6 +253,7 @@ export default function DietPage() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="e.g., Grilled Chicken Salad"
                   required
+                  style={{ color: '#111827' }}
                 />
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -197,6 +266,7 @@ export default function DietPage() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     placeholder="0"
                     min="0"
+                    style={{ color: '#111827' }}
                   />
                 </div>
                 <div>
@@ -209,6 +279,7 @@ export default function DietPage() {
                     placeholder="0"
                     min="0"
                     step="0.1"
+                    style={{ color: '#111827' }}
                   />
                 </div>
                 <div>
@@ -221,6 +292,7 @@ export default function DietPage() {
                     placeholder="0"
                     min="0"
                     step="0.1"
+                    style={{ color: '#111827' }}
                   />
                 </div>
                 <div>
@@ -233,6 +305,7 @@ export default function DietPage() {
                     placeholder="0"
                     min="0"
                     step="0.1"
+                    style={{ color: '#111827' }}
                   />
                 </div>
               </div>
@@ -245,6 +318,7 @@ export default function DietPage() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="0"
                   min="0"
+                  style={{ color: '#111827' }}
                 />
               </div>
               <div>
@@ -255,6 +329,7 @@ export default function DietPage() {
                   onChange={(e) => setNewEntry({ ...newEntry, notes: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="Any additional notes..."
+                  style={{ color: '#111827' }}
                 />
               </div>
               <div className="flex gap-3">

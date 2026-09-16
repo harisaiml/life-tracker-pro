@@ -110,6 +110,7 @@ export default function LoginPage() {
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                   placeholder="John Doe"
                   required={!isLogin}
+                  style={{ color: '#111827' }}
                 />
               </div>
             </div>
@@ -128,6 +129,7 @@ export default function LoginPage() {
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 placeholder="you@example.com"
                 required
+                style={{ color: '#111827' }}
               />
             </div>
           </div>
@@ -146,6 +148,7 @@ export default function LoginPage() {
                 placeholder="Min 6 characters"
                 required
                 minLength={6}
+                style={{ color: '#111827' }}
               />
               <button
                 type="button"
