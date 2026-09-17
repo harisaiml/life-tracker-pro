@@ -4,17 +4,17 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 
-export default function Home() {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const { user, loading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading) {
-      if (user) {
-        router.push('/dashboard')
-      } else {
-        // Stay on login page
-      }
+    if (!loading && !user) {
+      router.push('/login')
     }
   }, [user, loading, router])
 
@@ -23,20 +23,17 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center gap-4">
           <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-            <span className="text-3xl">✨</span>
+            <span className="text-3xl">(</span>
           </div>
-          <p className="text-gray-400">Loading Life Tracker...</p>
+          <p className="text-gray-400">Loading...</p>
         </div>
       </div>
     )
   }
 
-  // Show login page content
-  return <LoginPageContent />
-}
+  if (!user) {
+    return null
+  }
 
-function LoginPageContent() {
-  return <LoginPage />
+  return <>{children}</>
 }
-
-import LoginPage from './login/page'

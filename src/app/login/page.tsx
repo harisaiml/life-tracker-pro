@@ -1,206 +1,190 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { setUser, generateId } from '@/lib/storage';
-import { Eye, EyeOff, Mail, Lock, User, ArrowRight, CheckCircle } from 'lucide-react';
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
+import { Loader2, Sparkles, Shield, Zap, Heart } from 'lucide-react'
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [isLogin, setIsLogin] = useState(true)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const { signIn, signUp, guestSignIn } = useAuth()
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSuccess('');
+    e.preventDefault()
+    setError('')
+    setLoading(true)
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    if (isLogin) {
-      // Simple validation for demo
-      if (email && password.length >= 6) {
-        setUser({
-          id: generateId(),
-          email,
-          name: email.split('@')[0],
-        });
-        router.push('/dashboard');
+    try {
+      if (isLogin) {
+        const result = await signIn(email, password)
+        if (result.error) {
+          setError(result.error)
+        } else {
+          router.push('/dashboard')
+        }
       } else {
-        setError('Please enter valid credentials (password must be at least 6 characters)');
+        if (!name) {
+          setError('Please enter your name')
+          setLoading(false)
+          return
+        }
+        const result = await signUp(email, password, name)
+        if (result.error) {
+          setError(result.error)
+        } else {
+          router.push('/dashboard')
+        }
       }
-    } else {
-      // Registration
-      if (email && password.length >= 6 && name) {
-        setUser({
-          id: generateId(),
-          email,
-          name,
-        });
-        setSuccess('Account created successfully! Redirecting...');
-        setTimeout(() => router.push('/dashboard'), 1000);
-      } else {
-        setError('Please fill in all fields (password must be at least 6 characters)');
-      }
+    } catch (err) {
+      setError('An unexpected error occurred')
+    } finally {
+      setLoading(false)
     }
+  }
 
-    setLoading(false);
-  };
-
-  const handleGuestLogin = () => {
-    setUser({
-      id: generateId(),
-      email: 'guest@example.com',
-      name: 'Guest User',
-    });
-    router.push('/dashboard');
-  };
+  const handleGuestLogin = async () => {
+    setLoading(true)
+    await guestSignIn()
+    router.push('/dashboard')
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl">📊</span>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {isLogin ? 'Welcome Back' : 'Create Account'}
-          </h1>
-          <p className="text-gray-600">
-            {isLogin
-              ? 'Sign in to continue tracking your life'
-              : 'Start your life tracking journey today'}
-          </p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }} />
+      </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
-            <span className="text-lg">⚠️</span>
-            {error}
+      {/* Login Card */}
+      <div className="relative w-full max-w-md animate-scale-in">
+        <div className="glass rounded-3xl p-8 shadow-2xl">
+          {/* Logo and Title */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl mb-4 animate-pulse-glow">
+              <Sparkles className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold gradient-text mb-2">Life Tracker Pro</h1>
+            <p className="text-gray-400">Track everything that matters</p>
           </div>
-        )}
 
-        {success && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
-            <CheckCircle className="w-5 h-5" />
-            {success}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {!isLogin && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <div className="animate-slide-up">
+                <label className="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  placeholder="John Doe"
-                  required={!isLogin}
-                  style={{ color: '#111827' }}
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                  placeholder="Enter your name"
                 />
               </div>
-            </div>
-          )}
+            )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
                 placeholder="you@example.com"
                 required
-                style={{ color: '#111827' }}
               />
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
               <input
-                type={showPassword ? 'text' : 'password'}
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
                 placeholder="Min 6 characters"
                 required
                 minLength={6}
-                style={{ color: '#111827' }}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
             </div>
+
+            {error && (
+              <div className="p-3 rounded-xl bg-red-500/20 border border-red-500/50 text-red-400 text-sm animate-slide-up">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Please wait...</span>
+                </>
+              ) : (
+                <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
+              )}
+            </button>
+          </form>
+
+          {/* Guest Login */}
+          <div className="mt-4">
+            <button
+              onClick={handleGuestLogin}
+              disabled={loading}
+              className="w-full py-3 px-4 glass text-white font-medium rounded-xl hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+            >
+              <Heart className="w-4 h-4" />
+              <span>Continue as Guest</span>
+            </button>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25"
-          >
-            {loading ? (
-              <span className="animate-spin">⏳</span>
-            ) : (
-              <>
-                {isLogin ? 'Sign In' : 'Create Account'}
-                <ArrowRight className="w-5 h-5" />
-              </>
-            )}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
-            {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
+          {/* Toggle */}
+          <div className="mt-6 text-center">
             <button
               onClick={() => {
-                setIsLogin(!isLogin);
-                setError('');
-                setSuccess('');
+                setIsLogin(!isLogin)
+                setError('')
               }}
-              className="text-blue-600 hover:text-blue-700 font-semibold transition"
+              className="text-gray-400 hover:text-white transition-colors"
             >
-              {isLogin ? 'Sign Up' : 'Sign In'}
+              {isLogin ? (
+                <>Don&apos;t have an account? <span className="text-purple-400">Sign up</span></>
+              ) : (
+                <>Already have an account? <span className="text-purple-400">Sign in</span></>
+              )}
             </button>
-          </p>
-        </div>
+          </div>
 
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <button
-            onClick={handleGuestLogin}
-            className="block w-full text-center text-gray-500 hover:text-gray-700 text-sm py-2 px-4 rounded-lg hover:bg-gray-50 transition"
-          >
-            Continue as Guest (View Demo)
-          </button>
+          {/* Features */}
+          <div className="mt-8 pt-6 border-t border-white/10">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="space-y-1">
+                <Shield className="w-5 h-5 mx-auto text-green-400" />
+                <p className="text-xs text-gray-400">Secure</p>
+              </div>
+              <div className="space-y-1">
+                <Zap className="w-5 h-5 mx-auto text-yellow-400" />
+                <p className="text-xs text-gray-400">Fast</p>
+              </div>
+              <div className="space-y-1">
+                <Heart className="w-5 h-5 mx-auto text-red-400" />
+                <p className="text-xs text-gray-400">Free</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
