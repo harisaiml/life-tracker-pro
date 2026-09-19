@@ -45,6 +45,9 @@ export interface DietEntry {
   date: string;
 }
 
+// Alias for compatibility
+export type DietLog = DietEntry;
+
 export interface Goal {
   id: string;
   title: string;
