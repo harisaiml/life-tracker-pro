@@ -1,181 +1,174 @@
-'use client';
-
-import { Task, Habit, HabitLog, DietEntry, Goal, User } from '@/types';
+import { User, Task, Habit, HabitLog, DietLog, Goal } from '../types';
 
 const STORAGE_KEYS = {
   USER: 'life_tracker_user',
   TASKS: 'life_tracker_tasks',
   HABITS: 'life_tracker_habits',
   HABIT_LOGS: 'life_tracker_habit_logs',
-  DIET: 'life_tracker_diet',
+  DIET_LOGS: 'life_tracker_diet_logs',
   GOALS: 'life_tracker_goals',
 };
 
 // User functions
 export function getUser(): User | null {
-  if (typeof window === 'undefined') return null;
   const data = localStorage.getItem(STORAGE_KEYS.USER);
   return data ? JSON.parse(data) : null;
 }
 
 export function setUser(user: User): void {
-  if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
 }
 
-export function clearUser(): void {
-  if (typeof window === 'undefined') return;
+export function logout(): void {
   localStorage.removeItem(STORAGE_KEYS.USER);
 }
 
 // Task functions
 export function getTasks(): Task[] {
-  if (typeof window === 'undefined') return [];
   const data = localStorage.getItem(STORAGE_KEYS.TASKS);
   return data ? JSON.parse(data) : [];
 }
 
 export function setTasks(tasks: Task[]): void {
-  if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
 }
 
-export function addTask(task: Task): void {
+export function addTask(task: Task): Task[] {
   const tasks = getTasks();
   tasks.push(task);
   setTasks(tasks);
+  return tasks;
 }
 
-export function updateTask(taskId: string, updates: Partial<Task>): void {
-  const tasks = getTasks();
-  const index = tasks.findIndex(t => t.id === taskId);
-  if (index !== -1) {
-    tasks[index] = { ...tasks[index], ...updates };
-    setTasks(tasks);
-  }
+export function updateTask(taskId: string, updates: Partial<Task>): Task[] {
+  const tasks = getTasks().map(t => t.id === taskId ? { ...t, ...updates } : t);
+  setTasks(tasks);
+  return tasks;
 }
 
-export function deleteTask(taskId: string): void {
-  const tasks = getTasks();
-  setTasks(tasks.filter(t => t.id !== taskId));
+export function deleteTask(taskId: string): Task[] {
+  const tasks = getTasks().filter(t => t.id !== taskId);
+  setTasks(tasks);
+  return tasks;
 }
 
 // Habit functions
 export function getHabits(): Habit[] {
-  if (typeof window === 'undefined') return [];
   const data = localStorage.getItem(STORAGE_KEYS.HABITS);
   return data ? JSON.parse(data) : [];
 }
 
 export function setHabits(habits: Habit[]): void {
-  if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify(habits));
 }
 
-export function addHabit(habit: Habit): void {
+export function addHabit(habit: Habit): Habit[] {
   const habits = getHabits();
   habits.push(habit);
   setHabits(habits);
+  return habits;
 }
 
-export function deleteHabit(habitId: string): void {
-  const habits = getHabits();
-  setHabits(habits.filter(h => h.id !== habitId));
+export function deleteHabit(habitId: string): Habit[] {
+  const habits = getHabits().filter(h => h.id !== habitId);
+  setHabits(habits);
+  // Also delete habit logs
+  const logs = getHabitLogs().filter(l => l.habitId !== habitId);
+  setHabitLogs(logs);
+  return habits;
 }
 
 // Habit Log functions
 export function getHabitLogs(): HabitLog[] {
-  if (typeof window === 'undefined') return [];
   const data = localStorage.getItem(STORAGE_KEYS.HABIT_LOGS);
   return data ? JSON.parse(data) : [];
 }
 
 export function setHabitLogs(logs: HabitLog[]): void {
-  if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEYS.HABIT_LOGS, JSON.stringify(logs));
 }
 
-export function toggleHabitLog(habitId: string, date: string): boolean {
+export function toggleHabitLog(habitId: string, date: string): HabitLog[] {
   const logs = getHabitLogs();
   const existingIndex = logs.findIndex(l => l.habitId === habitId && l.date === date);
 
-  if (existingIndex !== -1) {
+  if (existingIndex >= 0) {
     logs.splice(existingIndex, 1);
-    setHabitLogs(logs);
-    return false;
   } else {
-    logs.push({ id: Date.now().toString(), habitId, date });
-    setHabitLogs(logs);
-    return true;
+    logs.push({
+      id: Date.now().toString(),
+      habitId,
+      date,
+    });
   }
+
+  setHabitLogs(logs);
+  return logs;
 }
 
-export function isHabitLoggedToday(habitId: string): boolean {
+export function isHabitDoneOnDate(habitId: string, date: string): boolean {
   const logs = getHabitLogs();
-  const today = new Date().toISOString().split('T')[0];
-  return logs.some(l => l.habitId === habitId && l.date === today);
+  return logs.some(l => l.habitId === habitId && l.date === date);
 }
 
-// Diet functions
-export function getDietEntries(): DietEntry[] {
-  if (typeof window === 'undefined') return [];
-  const data = localStorage.getItem(STORAGE_KEYS.DIET);
-  return data ? JSON.parse(data) : [];
+// Diet Log functions
+export function getDietLogs(date?: string): DietLog[] {
+  const data = localStorage.getItem(STORAGE_KEYS.DIET_LOGS);
+  const logs: DietLog[] = data ? JSON.parse(data) : [];
+
+  if (date) {
+    return logs.filter(l => l.date === date);
+  }
+  return logs;
 }
 
-export function setDietEntries(entries: DietEntry[]): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEYS.DIET, JSON.stringify(entries));
+export function setDietLogs(logs: DietLog[]): void {
+  localStorage.setItem(STORAGE_KEYS.DIET_LOGS, JSON.stringify(logs));
 }
 
-export function addDietEntry(entry: DietEntry): void {
-  const entries = getDietEntries();
-  entries.push(entry);
-  setDietEntries(entries);
+export function addDietLog(log: DietLog): DietLog[] {
+  const logs = getDietLogs();
+  logs.push(log);
+  setDietLogs(logs);
+  return logs;
 }
 
-export function deleteDietEntry(entryId: string): void {
-  const entries = getDietEntries();
-  setDietEntries(entries.filter(e => e.id !== entryId));
+export function deleteDietLog(logId: string, date: string): DietLog[] {
+  const logs = getDietLogs().filter(l => !(l.id === logId && l.date === date));
+  setDietLogs(logs);
+  return logs;
 }
 
 // Goal functions
 export function getGoals(): Goal[] {
-  if (typeof window === 'undefined') return [];
   const data = localStorage.getItem(STORAGE_KEYS.GOALS);
   return data ? JSON.parse(data) : [];
 }
 
 export function setGoals(goals: Goal[]): void {
-  if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEYS.GOALS, JSON.stringify(goals));
 }
 
-export function addGoal(goal: Goal): void {
+export function addGoal(goal: Goal): Goal[] {
   const goals = getGoals();
   goals.push(goal);
   setGoals(goals);
+  return goals;
 }
 
-export function updateGoal(goalId: string, updates: Partial<Goal>): void {
-  const goals = getGoals();
-  const index = goals.findIndex(g => g.id === goalId);
-  if (index !== -1) {
-    goals[index] = { ...goals[index], ...updates };
-    setGoals(goals);
-  }
+export function updateGoal(goalId: string, updates: Partial<Goal>): Goal[] {
+  const goals = getGoals().map(g => g.id === goalId ? { ...g, ...updates } : g);
+  setGoals(goals);
+  return goals;
 }
 
-export function deleteGoal(goalId: string): void {
-  const goals = getGoals();
-  setGoals(goals.filter(g => g.id !== goalId));
+export function deleteGoal(goalId: string): Goal[] {
+  const goals = getGoals().filter(g => g.id !== goalId);
+  setGoals(goals);
+  return goals;
 }
 
-// Utility functions
+// Helper function to generate unique IDs
 export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
-}
-
-export function getTodayDate(): string {
-  return new Date().toISOString().split('T')[0];
 }
