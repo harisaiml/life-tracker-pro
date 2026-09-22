@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
-import { Sparkles, Heart, Zap, Shield, Check, Plus, Trash2, X, Flame, Target, Coffee, Moon, BookOpen, Dumbbell, Droplets } from 'lucide-react';
+import { Sparkles, Heart, Zap, Shield, Check, Plus, Trash2, X, Flame, Target, Coffee, Moon, BookOpen, Dumbbell, Droplets, Brain, TrendingUp, BookText, Scale, Calculator } from 'lucide-react';
 
 // Types
 interface User { id: string; email: string; fullName: string; }
@@ -9,9 +9,13 @@ interface Habit { id: string; name: string; emoji: string; color: string; freque
 interface DietLog { id: string; mealType: string; foodName: string; calories: number; protein: number; carbs: number; fat: number; water: number; date: string; }
 interface Goal { id: string; title: string; targetValue: number; currentValue: number; unit: string; completed: boolean; deadline: string; }
 interface MoodEntry { id: string; mood: string; note: string; date: string; }
+interface SleepEntry { id: string; hours: number; quality: 'poor' | 'fair' | 'good' | 'excellent'; date: string; notes: string; }
+interface ExerciseEntry { id: string; type: string; duration: number; calories: number; date: string; }
+interface NoteEntry { id: string; title: string; content: string; date: string; }
+interface WeightEntry { id: string; weight: number; date: string; }
 
 // Storage
-const STORAGE_KEYS = { USER: 'lt_user', TASKS: 'lt_tasks', HABITS: 'lt_habits', DIET: 'lt_diet', GOALS: 'lt_goals', MOOD: 'lt_mood', HABIT_LOGS: 'lt_habit_logs' };
+const STORAGE_KEYS = { USER: 'lt_user', TASKS: 'lt_tasks', HABITS: 'lt_habits', DIET: 'lt_diet', GOALS: 'lt_goals', MOOD: 'lt_mood', HABIT_LOGS: 'lt_habit_logs', SLEEP: 'lt_sleep', EXERCISE: 'lt_exercise', NOTES: 'lt_notes', WEIGHT: 'lt_weight' };
 const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
 const getItem = <T,>(key: string): T[] => { const d = localStorage.getItem(key); return d ? JSON.parse(d) : []; };
 const setItem = <T,>(key: string, data: T[]) => localStorage.setItem(key, JSON.stringify(data));
@@ -120,6 +124,10 @@ function Sidebar() {
     { path: '/diet', label: 'Diet', icon: Coffee },
     { path: '/goals', label: 'Goals', icon: Target },
     { path: '/mood', label: 'Mood', icon: Heart },
+    { path: '/sleep', label: 'Sleep', icon: Moon },
+    { path: '/exercise', label: 'Exercise', icon: Dumbbell },
+    { path: '/notes', label: 'Notes', icon: BookText },
+    { path: '/weight', label: 'Weight', icon: Scale },
   ];
   return (
     <div className="fixed left-0 top-0 h-full w-64 bg-white/10 backdrop-blur-lg border-r border-white/20 flex flex-col">
@@ -635,6 +643,331 @@ function MoodPage() {
   );
 }
 
+// Sleep Page
+function SleepPage() {
+  const [entries, setEntries] = useState<SleepEntry[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [newEntry, setNewEntry] = useState({ hours: 7, quality: 'good' as const, notes: '' });
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+
+  useEffect(() => { setEntries(getItem<SleepEntry>(STORAGE_KEYS.SLEEP)); }, []);
+
+  const saveSleep = () => {
+    const entry: SleepEntry = { id: generateId(), date: selectedDate, ...newEntry };
+    const all = getItem<SleepEntry>(STORAGE_KEYS.SLEEP);
+    const existing = all.findIndex(e => e.date === selectedDate);
+    if (existing >= 0) all[existing] = entry;
+    else all.push(entry);
+    setItem(STORAGE_KEYS.SLEEP, all);
+    setEntries(all);
+    setShowForm(false);
+    setNewEntry({ hours: 7, quality: 'good', notes: '' });
+  };
+
+  const deleteSleep = (id: string) => {
+    const all = getItem<SleepEntry>(STORAGE_KEYS.SLEEP).filter(e => e.id !== id);
+    setItem(STORAGE_KEYS.SLEEP, all);
+    setEntries(all);
+  };
+
+  const qualityColors = { poor: 'bg-red-500', fair: 'bg-orange-500', good: 'bg-green-500', excellent: 'bg-emerald-500' };
+  const qualityLabels = { poor: 'Poor', fair: 'Fair', good: 'Good', excellent: 'Excellent' };
+  const todaySleep = entries.find(e => e.date === selectedDate);
+  const avgSleep = entries.length > 0 ? (entries.reduce((s, e) => s + e.hours, 0) / entries.length).toFixed(1) : '0';
+
+  return (
+    <div className="ml-64 p-8">
+      <div className="flex items-center justify-between mb-8">
+        <div><h1 className="text-3xl font-bold text-white">Sleep Tracker</h1><p className="text-gray-400 mt-1">Track your sleep quality</p></div>
+        <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white" />
+      </div>
+      <div className="grid grid-cols-3 gap-6 mb-8">
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+          <div className="w-12 h-12 bg-indigo-500/20 rounded-xl flex items-center justify-center mb-4"><Moon className="w-6 h-6 text-indigo-400" /></div>
+          <p className="text-3xl font-bold text-white">{todaySleep ? todaySleep.hours : 0}h</p>
+          <p className="text-gray-400 mt-1">Last Night</p>
+        </div>
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+          <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4"><Brain className="w-6 h-6 text-purple-400" /></div>
+          <p className="text-3xl font-bold text-white">{avgSleep}h</p>
+          <p className="text-gray-400 mt-1">Average Sleep</p>
+        </div>
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+          <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center mb-4"><TrendingUp className="w-6 h-6 text-emerald-400" /></div>
+          <p className="text-3xl font-bold text-white">{entries.length}</p>
+          <p className="text-gray-400 mt-1">Nights Tracked</p>
+        </div>
+      </div>
+      <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 bg-indigo-500 text-white px-4 py-2 rounded-xl hover:bg-indigo-600 transition-all mb-6">
+        <Plus className="w-5 h-5" /> Log Sleep
+      </button>
+      {showForm && (
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6 border border-white/20">
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Hours Slept</label>
+              <input type="number" step="0.5" min="0" max="24" value={newEntry.hours} onChange={e => setNewEntry({ ...newEntry, hours: +e.target.value })} className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white" />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Quality</label>
+              <select value={newEntry.quality} onChange={e => setNewEntry({ ...newEntry, quality: e.target.value as any })} className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white">
+                <option value="poor">Poor</option><option value="fair">Fair</option><option value="good">Good</option><option value="excellent">Excellent</option>
+              </select>
+            </div>
+          </div>
+          <textarea value={newEntry.notes} onChange={e => setNewEntry({ ...newEntry, notes: e.target.value })} placeholder="Notes (optional)" className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white mb-4 outline-none" rows={2} />
+          <div className="flex gap-3">
+            <button onClick={saveSleep} className="px-6 py-2 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600">Save</button>
+            <button onClick={() => setShowForm(false)} className="px-6 py-2 bg-white/10 text-white rounded-xl hover:bg-white/20">Cancel</button>
+          </div>
+        </div>
+      )}
+      <h2 className="text-xl font-semibold text-white mb-4">Recent Sleep</h2>
+      <div className="space-y-4">
+        {entries.slice().reverse().slice(0, 7).map(e => (
+          <div key={e.id} className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20 flex items-center gap-4">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${qualityColors[e.quality]}`}><Moon className="w-6 h-6 text-white" /></div>
+            <div className="flex-1">
+              <p className="text-white font-medium">{e.hours} hours - {qualityLabels[e.quality]}</p>
+              <p className="text-gray-400 text-sm">{e.date}</p>
+            </div>
+            <button onClick={() => deleteSleep(e.id)} className="text-gray-400 hover:text-red-400"><Trash2 className="w-5 h-5" /></button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Exercise Page
+function ExercisePage() {
+  const [entries, setEntries] = useState<ExerciseEntry[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [newEntry, setNewEntry] = useState({ type: 'Running', duration: 30, calories: 200 });
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+
+  useEffect(() => { setEntries(getItem<ExerciseEntry>(STORAGE_KEYS.EXERCISE).filter(e => e.date === selectedDate)); }, [selectedDate]);
+
+  const saveExercise = () => {
+    const entry: ExerciseEntry = { id: generateId(), date: selectedDate, ...newEntry };
+    const all = getItem<ExerciseEntry>(STORAGE_KEYS.EXERCISE);
+    all.push(entry);
+    setItem(STORAGE_KEYS.EXERCISE, all);
+    setEntries([...entries, entry]);
+    setShowForm(false);
+    setNewEntry({ type: 'Running', duration: 30, calories: 200 });
+  };
+
+  const deleteExercise = (id: string) => {
+    const all = getItem<ExerciseEntry>(STORAGE_KEYS.EXERCISE).filter(e => e.id !== id);
+    setItem(STORAGE_KEYS.EXERCISE, all);
+    setEntries(entries.filter(e => e.id !== id));
+  };
+
+  const totals = entries.reduce((acc, e) => ({ duration: acc.duration + e.duration, calories: acc.calories + e.calories }), { duration: 0, calories: 0 });
+  const exerciseTypes = ['Running', 'Walking', 'Cycling', 'Swimming', 'Gym', 'Yoga', 'HIIT', 'Sports', 'Other'];
+  const exerciseIcons: Record<string, string> = { Running: '🏃', Walking: '🚶', Cycling: '🚴', Swimming: '🏊', Gym: '💪', Yoga: '🧘', HIIT: '⚡', Sports: '⚽', Other: '🏋️' };
+
+  return (
+    <div className="ml-64 p-8">
+      <div className="flex items-center justify-between mb-8">
+        <div><h1 className="text-3xl font-bold text-white">Exercise Tracker</h1><p className="text-gray-400 mt-1">Log your workouts</p></div>
+        <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white" />
+      </div>
+      <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6 border border-white/20">
+        <div className="grid grid-cols-4 gap-4 text-center">
+          <div><div className="w-12 h-12 mx-auto mb-2 bg-orange-500/20 rounded-full flex items-center justify-center"><Dumbbell className="w-6 h-6 text-orange-400" /></div><p className="text-2xl font-bold text-white">{totals.duration}</p><p className="text-sm text-gray-400">Minutes</p></div>
+          <div><div className="w-12 h-12 mx-auto mb-2 bg-red-500/20 rounded-full flex items-center justify-center"><Flame className="w-6 h-6 text-red-400" /></div><p className="text-2xl font-bold text-white">{totals.calories}</p><p className="text-sm text-gray-400">Calories</p></div>
+          <div><div className="w-12 h-12 mx-auto mb-2 bg-blue-500/20 rounded-full flex items-center justify-center"><Check className="w-6 h-6 text-blue-400" /></div><p className="text-2xl font-bold text-white">{entries.length}</p><p className="text-sm text-gray-400">Workouts</p></div>
+        </div>
+      </div>
+      <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-xl hover:bg-orange-600 transition-all mb-6">
+        <Plus className="w-5 h-5" /> Log Exercise
+      </button>
+      {showForm && (
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6 border border-white/20">
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Exercise Type</label>
+              <select value={newEntry.type} onChange={e => setNewEntry({ ...newEntry, type: e.target.value })} className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white">
+                {exerciseTypes.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Duration (min)</label>
+              <input type="number" value={newEntry.duration} onChange={e => setNewEntry({ ...newEntry, duration: +e.target.value })} className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white" />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Calories</label>
+              <input type="number" value={newEntry.calories} onChange={e => setNewEntry({ ...newEntry, calories: +e.target.value })} className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white" />
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <button onClick={saveExercise} className="px-6 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600">Save</button>
+            <button onClick={() => setShowForm(false)} className="px-6 py-2 bg-white/10 text-white rounded-xl hover:bg-white/20">Cancel</button>
+          </div>
+        </div>
+      )}
+      <h2 className="text-xl font-semibold text-white mb-4">Today's Exercises</h2>
+      <div className="space-y-4">
+        {entries.map(e => (
+          <div key={e.id} className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20 flex items-center gap-4">
+            <span className="text-4xl">{exerciseIcons[e.type] || '💪'}</span>
+            <div className="flex-1">
+              <p className="text-white font-medium">{e.type}</p>
+              <p className="text-gray-400 text-sm">{e.duration} min • {e.calories} cal</p>
+            </div>
+            <button onClick={() => deleteExercise(e.id)} className="text-gray-400 hover:text-red-400"><Trash2 className="w-5 h-5" /></button>
+          </div>
+        ))}
+        {entries.length === 0 && <div className="text-center py-8 text-gray-400">No exercises logged today</div>}
+      </div>
+    </div>
+  );
+}
+
+// Notes Page
+function NotesPage() {
+  const [entries, setEntries] = useState<NoteEntry[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [newEntry, setNewEntry] = useState({ title: '', content: '' });
+
+  useEffect(() => { setEntries(getItem<NoteEntry>(STORAGE_KEYS.NOTES)); }, []);
+
+  const saveNote = () => {
+    if (!newEntry.title) return;
+    const entry: NoteEntry = { id: generateId(), date: new Date().toISOString().split('T')[0], ...newEntry };
+    const updated = [...entries, entry];
+    setItem(STORAGE_KEYS.NOTES, updated);
+    setEntries(updated);
+    setShowForm(false);
+    setNewEntry({ title: '', content: '' });
+  };
+
+  const deleteNote = (id: string) => {
+    const updated = entries.filter(e => e.id !== id);
+    setItem(STORAGE_KEYS.NOTES, updated);
+    setEntries(updated);
+  };
+
+  return (
+    <div className="ml-64 p-8">
+      <div className="flex items-center justify-between mb-8">
+        <div><h1 className="text-3xl font-bold text-white">Notes</h1><p className="text-gray-400 mt-1">Quick notes and journal</p></div>
+        <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 bg-teal-500 text-white px-4 py-2 rounded-xl hover:bg-teal-600 transition-all">
+          <Plus className="w-5 h-5" /> Add Note
+        </button>
+      </div>
+      {showForm && (
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6 border border-white/20">
+          <input type="text" value={newEntry.title} onChange={e => setNewEntry({ ...newEntry, title: e.target.value })} placeholder="Note title" className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white mb-4 outline-none" />
+          <textarea value={newEntry.content} onChange={e => setNewEntry({ ...newEntry, content: e.target.value })} placeholder="Write your note..." className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white mb-4 outline-none" rows={4} />
+          <div className="flex gap-3">
+            <button onClick={saveNote} className="px-6 py-2 bg-teal-500 text-white rounded-xl hover:bg-teal-600">Save</button>
+            <button onClick={() => setShowForm(false)} className="px-6 py-2 bg-white/10 text-white rounded-xl hover:bg-white/20">Cancel</button>
+          </div>
+        </div>
+      )}
+      <div className="grid grid-cols-3 gap-6">
+        {entries.slice().reverse().map(e => (
+          <div key={e.id} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+            <div className="flex items-start justify-between mb-4">
+              <BookText className="w-6 h-6 text-teal-400" />
+              <button onClick={() => deleteNote(e.id)} className="text-gray-400 hover:text-red-400"><Trash2 className="w-5 h-5" /></button>
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">{e.title}</h3>
+            <p className="text-gray-400 text-sm mb-4 line-clamp-3">{e.content || 'No content'}</p>
+            <p className="text-gray-500 text-xs">{e.date}</p>
+          </div>
+        ))}
+      </div>
+      {entries.length === 0 && <div className="text-center py-20 text-gray-400">No notes yet. Start writing!</div>}
+    </div>
+  );
+}
+
+// Weight Page
+function WeightPage() {
+  const [entries, setEntries] = useState<WeightEntry[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [newEntry, setNewEntry] = useState({ weight: 70 });
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+
+  useEffect(() => { setEntries(getItem<WeightEntry>(STORAGE_KEYS.WEIGHT)); }, []);
+
+  const saveWeight = () => {
+    const entry: WeightEntry = { id: generateId(), date: selectedDate, weight: newEntry.weight };
+    const all = getItem<WeightEntry>(STORAGE_KEYS.WEIGHT);
+    const existing = all.findIndex(e => e.date === selectedDate);
+    if (existing >= 0) all[existing] = entry;
+    else all.push(entry);
+    setItem(STORAGE_KEYS.WEIGHT, all);
+    setEntries(all);
+    setShowForm(false);
+  };
+
+  const deleteWeight = (id: string) => {
+    const all = getItem<WeightEntry>(STORAGE_KEYS.WEIGHT).filter(e => e.id !== id);
+    setItem(STORAGE_KEYS.WEIGHT, all);
+    setEntries(all);
+  };
+
+  const sortedEntries = entries.slice().sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const currentWeight = sortedEntries[0]?.weight || 0;
+  const startWeight = sortedEntries[sortedEntries.length - 1]?.weight || 0;
+  const weightChange = startWeight > 0 ? (currentWeight - startWeight).toFixed(1) : '0';
+  const trend = +weightChange < 0 ? 'down' : +weightChange > 0 ? 'up' : 'stable';
+
+  return (
+    <div className="ml-64 p-8">
+      <div className="flex items-center justify-between mb-8">
+        <div><h1 className="text-3xl font-bold text-white">Weight Tracker</h1><p className="text-gray-400 mt-1">Monitor your weight</p></div>
+        <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 bg-pink-500 text-white px-4 py-2 rounded-xl hover:bg-pink-600 transition-all">
+          <Plus className="w-5 h-5" /> Log Weight
+        </button>
+      </div>
+      <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6 border border-white/20">
+        <div className="grid grid-cols-3 gap-4 text-center">
+          <div><div className="w-12 h-12 mx-auto mb-2 bg-pink-500/20 rounded-full flex items-center justify-center"><Scale className="w-6 h-6 text-pink-400" /></div><p className="text-3xl font-bold text-white">{currentWeight}</p><p className="text-sm text-gray-400">Current (kg)</p></div>
+          <div><div className="w-12 h-12 mx-auto mb-2 bg-purple-500/20 rounded-full flex items-center justify-center"><TrendingUp className={`w-6 h-6 ${trend === 'down' ? 'text-green-400 rotate-180' : trend === 'up' ? 'text-red-400' : 'text-gray-400'}`} /></div><p className={`text-3xl font-bold ${trend === 'down' ? 'text-green-400' : trend === 'up' ? 'text-red-400' : 'text-white'}`}>{weightChange} kg</p><p className="text-sm text-gray-400">Change</p></div>
+          <div><div className="w-12 h-12 mx-auto mb-2 bg-emerald-500/20 rounded-full flex items-center justify-center"><Calculator className="w-6 h-6 text-emerald-400" /></div><p className="text-3xl font-bold text-white">{entries.length}</p><p className="text-sm text-gray-400">Entries</p></div>
+        </div>
+      </div>
+      {showForm && (
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6 border border-white/20">
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Weight (kg)</label>
+              <input type="number" step="0.1" value={newEntry.weight} onChange={e => setNewEntry({ ...newEntry, weight: +e.target.value })} className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white" />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Date</label>
+              <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white" />
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <button onClick={saveWeight} className="px-6 py-2 bg-pink-500 text-white rounded-xl hover:bg-pink-600">Save</button>
+            <button onClick={() => setShowForm(false)} className="px-6 py-2 bg-white/10 text-white rounded-xl hover:bg-white/20">Cancel</button>
+          </div>
+        </div>
+      )}
+      <h2 className="text-xl font-semibold text-white mb-4">History</h2>
+      <div className="space-y-4">
+        {sortedEntries.slice(0, 14).map(e => (
+          <div key={e.id} className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20 flex items-center gap-4">
+            <div className="w-12 h-12 bg-pink-500/20 rounded-xl flex items-center justify-center"><Scale className="w-6 h-6 text-pink-400" /></div>
+            <div className="flex-1">
+              <p className="text-white font-medium">{e.weight} kg</p>
+              <p className="text-gray-400 text-sm">{e.date}</p>
+            </div>
+            <button onClick={() => deleteWeight(e.id)} className="text-gray-400 hover:text-red-400"><Trash2 className="w-5 h-5" /></button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // Layout
 function Layout({ children }: { children: ReactNode }) {
   return (
@@ -658,6 +991,10 @@ function App() {
         <Route path="/diet" element={user ? <Layout><DietPage /></Layout> : <Navigate to="/login" />} />
         <Route path="/goals" element={user ? <Layout><GoalsPage /></Layout> : <Navigate to="/login" />} />
         <Route path="/mood" element={user ? <Layout><MoodPage /></Layout> : <Navigate to="/login" />} />
+        <Route path="/sleep" element={user ? <Layout><SleepPage /></Layout> : <Navigate to="/login" />} />
+        <Route path="/exercise" element={user ? <Layout><ExercisePage /></Layout> : <Navigate to="/login" />} />
+        <Route path="/notes" element={user ? <Layout><NotesPage /></Layout> : <Navigate to="/login" />} />
+        <Route path="/weight" element={user ? <Layout><WeightPage /></Layout> : <Navigate to="/login" />} />
         <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
       </Routes>
     </BrowserRouter>
