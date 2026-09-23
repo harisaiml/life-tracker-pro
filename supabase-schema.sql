@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS weight_logs (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Enable Row Level Security on all tables
+-- Enable Row Level Security
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE habits ENABLE ROW LEVEL SECURITY;
@@ -162,77 +162,38 @@ ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE weight_logs ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
--- Profiles: Users can only see/edit their own profile
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY "Users can insert own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
-
--- Tasks: Users can only access their own tasks
 CREATE POLICY "Users can CRUD own tasks" ON tasks FOR ALL USING (auth.uid() = user_id);
-
--- Habits: Users can only access their own habits
 CREATE POLICY "Users can CRUD own habits" ON habits FOR ALL USING (auth.uid() = user_id);
-
--- Habit logs: Users can only access their own habit logs
 CREATE POLICY "Users can CRUD own habit logs" ON habit_logs FOR ALL USING (auth.uid() = user_id);
-
--- Goals: Users can only access their own goals
 CREATE POLICY "Users can CRUD own goals" ON goals FOR ALL USING (auth.uid() = user_id);
-
--- Meals: Users can only access their own meals
 CREATE POLICY "Users can CRUD own meals" ON meals FOR ALL USING (auth.uid() = user_id);
-
--- Water logs: Users can only access their own water logs
 CREATE POLICY "Users can CRUD own water logs" ON water_logs FOR ALL USING (auth.uid() = user_id);
-
--- Mood logs: Users can only access their own mood logs
 CREATE POLICY "Users can CRUD own mood logs" ON mood_logs FOR ALL USING (auth.uid() = user_id);
-
--- Sleep logs: Users can only access their own sleep logs
 CREATE POLICY "Users can CRUD own sleep logs" ON sleep_logs FOR ALL USING (auth.uid() = user_id);
-
--- Exercise logs: Users can only access their own exercise logs
 CREATE POLICY "Users can CRUD own exercise logs" ON exercise_logs FOR ALL USING (auth.uid() = user_id);
-
--- Notes: Users can only access their own notes
 CREATE POLICY "Users can CRUD own notes" ON notes FOR ALL USING (auth.uid() = user_id);
-
--- Weight logs: Users can only access their own weight logs
 CREATE POLICY "Users can CRUD own weight logs" ON weight_logs FOR ALL USING (auth.uid() = user_id);
 
--- Functions
 -- Auto-create profile on user signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO public.profiles (id, full_name, email, created_at, updated_at)
-  VALUES (
-    NEW.id,
-    COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
-    NEW.email,
-    NOW(),
-    NOW()
-  );
+  VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'full_name', ''), NEW.email, NOW(), NOW());
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Trigger for auto-creating profile
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- Auto-update updated_at timestamp
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- Auto-update timestamps
+CREATE OR REPLACE FUNCTION update_updated_at_column() RETURNS TRIGGER AS $$
+BEGIN NEW.updated_at = NOW(); RETURN NEW; END; $$ LANGUAGE plpgsql;
 
--- Apply updated_at triggers
 CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_tasks_updated_at BEFORE UPDATE ON tasks FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_habits_updated_at BEFORE UPDATE ON habits FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
