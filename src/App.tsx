@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Sparkles, Heart, Zap, Shield, Check, Plus, Trash2, X, Flame, Target, Coffee, Moon, Dumbbell, Droplets, Brain, TrendingUp, BookText, Scale, Calculator, Settings, Calendar, LayoutDashboard, User, Eye, EyeOff, ChevronRight, BarChart3 } from 'lucide-react';
 import { useSupabaseAuth, useTasks, useHabits, useHabitLogs, useGoals, useMeals, useMoodLogs, useSleepLogs, useExerciseLogs, useNotes, useWeightLogs } from './hooks/useDatabase';
 import type { User as AppUser } from '@supabase/supabase-js';
@@ -12,6 +12,7 @@ const icons: Record<string, any> = {
 // Login Page
 function LoginPage() {
   const { signIn, signUp, signInWithGoogle } = useSupabaseAuth();
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,7 +28,11 @@ function LoginPage() {
 
     if (isLogin) {
       const result = await signIn(email, password);
-      if (result.error) setError(result.error);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        navigate('/dashboard');
+      }
     } else {
       if (password.length < 6) {
         setError('Password must be at least 6 characters');
@@ -35,7 +40,11 @@ function LoginPage() {
         return;
       }
       const result = await signUp(email, password, name);
-      if (result.error) setError(result.error);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        navigate('/dashboard');
+      }
     }
     setLoading(false);
   };
@@ -44,7 +53,11 @@ function LoginPage() {
     setError('');
     setLoading(true);
     const result = await signInWithGoogle();
-    if (result.error) setError(result.error);
+    if (result.error) {
+      setError(result.error);
+    } else {
+      navigate('/dashboard');
+    }
     setLoading(false);
   };
 
