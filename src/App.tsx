@@ -1,137 +1,21 @@
-import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Sparkles, Heart, Zap, Shield, Check, Plus, Trash2, X, Flame, Target, Coffee, Moon, Dumbbell, Droplets, Brain, TrendingUp, BookText, Scale, Calculator, Settings, Calendar, LayoutDashboard, User, Eye, EyeOff, ChevronRight, BarChart3 } from 'lucide-react';
+import { useState } from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { Sparkles, Heart, Zap, Shield, Check, Plus, Trash2, X, Flame, Target, Coffee, Moon, Dumbbell, Droplets, Brain, TrendingUp, BookText, Scale, Calculator, Settings, Calendar, LayoutDashboard, User, Eye, EyeOff, BarChart3 } from 'lucide-react';
 import { useSupabaseAuth, useTasks, useHabits, useHabitLogs, useGoals, useMeals, useMoodLogs, useSleepLogs, useExerciseLogs, useNotes, useWeightLogs } from './hooks/useDatabase';
-import type { User as AppUser } from '@supabase/supabase-js';
 
 // Icons mapping
 const icons: Record<string, any> = {
   Sparkles, Heart, Zap, Shield, Check, Plus, Trash2, X, Flame, Target, Coffee, Moon, Dumbbell, Droplets, Brain, TrendingUp, BookText, Scale, Calculator, Settings, Calendar, LayoutDashboard, User, BarChart3
 };
 
-// Login Page
-function LoginPage() {
-  const { signIn, signUp, signInWithGoogle } = useSupabaseAuth();
-  const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    if (isLogin) {
-      const result = await signIn(email, password);
-      if (result.error) {
-        setError(result.error);
-      } else {
-        navigate('/dashboard');
-      }
-    } else {
-      if (password.length < 6) {
-        setError('Password must be at least 6 characters');
-        setLoading(false);
-        return;
-      }
-      const result = await signUp(email, password, name);
-      if (result.error) {
-        setError(result.error);
-      } else {
-        navigate('/dashboard');
-      }
-    }
-    setLoading(false);
-  };
-
-  const handleGoogleLogin = async () => {
-    setError('');
-    setLoading(true);
-    const result = await signInWithGoogle();
-    if (result.error) {
-      setError(result.error);
-    } else {
-      navigate('/dashboard');
-    }
-    setLoading(false);
-  };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-      </div>
-      <div className="relative w-full max-w-md bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl mb-4">
-            <Sparkles className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Life Tracker</h1>
-          <p className="text-gray-400 mt-1">{isLogin ? 'Welcome back!' : 'Create your account'}</p>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
-              <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:border-purple-500 outline-none text-white placeholder-gray-500" placeholder="John Doe" required={!isLogin} />
-            </div>
-          )}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:border-purple-500 outline-none text-white placeholder-gray-500" placeholder="you@example.com" required />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
-            <div className="relative">
-              <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:border-purple-500 outline-none text-white placeholder-gray-500 pr-12" placeholder="Min 6 characters" required minLength={6} />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-          {error && <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400 text-sm">{error}</div>}
-          <button type="submit" disabled={loading} className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
-            {loading ? <span className="animate-spin">⟳</span> : null}
-            {isLogin ? 'Sign In' : 'Create Account'}
-          </button>
-        </form>
-        <div className="mt-4">
-          <button onClick={handleGoogleLogin} disabled={loading} className="w-full py-3 bg-white/10 border border-white/20 text-white rounded-xl hover:bg-white/20 transition-all flex items-center justify-center gap-2">
-            <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#fff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Continue with Google
-          </button>
-        </div>
-        <button onClick={() => { setIsLogin(!isLogin); setError(''); }} className="w-full mt-4 py-3 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-all">
-          {isLogin ? "Don't have account? Sign Up" : 'Have account? Sign In'}
-        </button>
-        <div className="mt-6 pt-6 border-t border-white/10">
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div><Shield className="w-5 h-5 mx-auto text-green-400" /><p className="text-xs text-gray-400 mt-1">Secure</p></div>
-            <div><Zap className="w-5 h-5 mx-auto text-yellow-400" /><p className="text-xs text-gray-400 mt-1">Fast</p></div>
-            <div><Heart className="w-5 h-5 mx-auto text-red-400" /><p className="text-xs text-gray-400 mt-1">Free</p></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // Sidebar
 function Sidebar() {
-  const location = useLocation();
-  const { user, signOut } = useSupabaseAuth();
+  const { signOut } = useSupabaseAuth();
 
   const navItems = [
     { group: 'Overview', items: [
-      { path: '/dashboard', label: 'Dashboard', icon: 'Sparkles' },
+      { path: '/', label: 'Dashboard', icon: 'Sparkles' },
       { path: '/today', label: 'Today', icon: 'Target' },
-      { path: '/calendar', label: 'Calendar', icon: 'Calendar' },
     ]},
     { group: 'Productivity', items: [
       { path: '/tasks', label: 'Tasks', icon: 'Check' },
@@ -148,14 +32,11 @@ function Sidebar() {
       { path: '/mood', label: 'Mood', icon: 'Heart' },
       { path: '/notes', label: 'Notes', icon: 'BookText' },
     ]},
-    { group: 'Insights', items: [
-      { path: '/analytics', label: 'Analytics', icon: 'BarChart3' },
-    ]},
   ];
 
   return (
-    <div className="fixed left-0 top-0 h-full w-64 bg-white/10 backdrop-blur-lg border-r border-white/20 flex flex-col z-50">
-      <div className="p-6 border-b border-white/20">
+    <div className="fixed left-0 top-0 h-full w-64 bg-slate-900/80 backdrop-blur-xl border-r border-white/10 flex flex-col z-50">
+      <div className="p-6 border-b border-white/10">
         <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Life Tracker</h1>
       </div>
       <nav className="flex-1 p-4 overflow-y-auto">
@@ -165,7 +46,7 @@ function Sidebar() {
             {group.items.map(item => {
               const IconComponent = icons[item.icon];
               return (
-                <Link key={item.path} to={item.path} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 transition-all ${location.pathname === item.path ? 'bg-purple-500/30 text-purple-300' : 'text-gray-400 hover:bg-white/10 hover:text-white'}`}>
+                <Link key={item.path} to={item.path} className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 transition-all text-gray-400 hover:bg-white/10 hover:text-white">
                   {IconComponent && <IconComponent className="w-5 h-5" />}
                   {item.label}
                 </Link>
@@ -174,10 +55,7 @@ function Sidebar() {
           </div>
         ))}
       </nav>
-      <div className="p-4 border-t border-white/20">
-        <Link to="/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-white/10 hover:text-white transition-all mb-2">
-          <Settings className="w-5 h-5" /> Settings
-        </Link>
+      <div className="p-4 border-t border-white/10">
         <button onClick={signOut} className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-gray-400 hover:bg-white/10 hover:text-white transition-all">
           <X className="w-5 h-5" /> Logout
         </button>
@@ -356,7 +234,6 @@ function HabitsPage() {
   };
 
   const EMOJIS = ['💪', '🏃', '📚', '💧', '🧘', '💤', '🍎', '✍️', '🎯', '💊'];
-  const COLORS = ['#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#3b82f6'];
 
   return (
     <div className="ml-64 p-8">
@@ -959,61 +836,118 @@ function TodayPage() {
   );
 }
 
-// Calendar Page (Simple)
-function CalendarPage() {
-  return (
-    <div className="ml-64 p-8">
-      <h1 className="text-3xl font-bold text-white mb-8">Calendar</h1>
-      <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-        <p className="text-gray-400 text-center py-20">Calendar view coming soon. Track your daily activity from the Dashboard or individual modules.</p>
+// Auth Page - Integrated on main screen
+function AuthPage() {
+  const { signIn, signUp, signInWithGoogle, signOut, user } = useSupabaseAuth();
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    if (isLogin) {
+      const result = await signIn(email, password);
+      if (result.error) setError(result.error);
+    } else {
+      if (password.length < 6) {
+        setError('Password must be at least 6 characters');
+        setLoading(false);
+        return;
+      }
+      const result = await signUp(email, password, name);
+      if (result.error) setError(result.error);
+    }
+    setLoading(false);
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setLoading(true);
+    const result = await signInWithGoogle();
+    if (result.error) setError(result.error);
+    setLoading(false);
+  };
+
+  // If already logged in, show logout button
+  if (user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+        <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl mb-4">
+            <Sparkles className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-2">Life Tracker</h1>
+          <p className="text-gray-400 mb-4">Logged in as {user.email}</p>
+          <button onClick={signOut} className="px-6 py-3 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition-all">
+            Logout
+          </button>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-// Analytics Page (Simple)
-function AnalyticsPage() {
   return (
-    <div className="ml-64 p-8">
-      <h1 className="text-3xl font-bold text-white mb-8">Analytics</h1>
-      <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-        <p className="text-gray-400 text-center py-20">Analytics dashboard coming soon. Track your trends and progress over time.</p>
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
-    </div>
-  );
-}
-
-// Settings Page
-function SettingsPage() {
-  const { user, signOut } = useSupabaseAuth();
-
-  return (
-    <div className="ml-64 p-8">
-      <h1 className="text-3xl font-bold text-white mb-8">Settings</h1>
-      <div className="space-y-6">
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-          <h2 className="text-xl font-semibold text-white mb-4">Profile</h2>
-          <div className="space-y-4">
+      <div className="relative w-full max-w-md bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl mb-4">
+            <Sparkles className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Life Tracker</h1>
+          <p className="text-gray-400 mt-1">{isLogin ? 'Welcome back!' : 'Create your account'}</p>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {!isLogin && (
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Email</label>
-              <p className="text-white">{user?.email}</p>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
+              <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:border-purple-500 outline-none text-white placeholder-gray-500" placeholder="John Doe" />
             </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">User ID</label>
-              <p className="text-gray-500 text-sm">{user?.id}</p>
+          )}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:border-purple-500 outline-none text-white placeholder-gray-500" placeholder="you@example.com" required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+            <div className="relative">
+              <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:border-purple-500 outline-none text-white placeholder-gray-500 pr-12" placeholder="Min 6 characters" required minLength={6} />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
             </div>
           </div>
+          {error && <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400 text-sm">{error}</div>}
+          <button type="submit" disabled={loading} className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+            {loading ? <span className="animate-spin">⟳</span> : null}
+            {isLogin ? 'Sign In' : 'Create Account'}
+          </button>
+        </form>
+        <div className="mt-4">
+          <button onClick={handleGoogleLogin} disabled={loading} className="w-full py-3 bg-white/10 border border-white/20 text-white rounded-xl hover:bg-white/20 transition-all flex items-center justify-center gap-2">
+            <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#fff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Continue with Google
+          </button>
         </div>
-
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-          <h2 className="text-xl font-semibold text-white mb-4">Account</h2>
-          <button onClick={signOut} className="px-6 py-2 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30">Logout</button>
-        </div>
-
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-          <h2 className="text-xl font-semibold text-white mb-4">About</h2>
-          <p className="text-gray-400">Life Tracker Pro v2.0</p>
-          <p className="text-gray-500 text-sm">Built with React, Supabase, and Tailwind CSS</p>
+        <button onClick={() => { setIsLogin(!isLogin); setError(''); }} className="w-full mt-4 py-3 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-all">
+          {isLogin ? "Don't have account? Sign Up" : 'Have account? Sign In'}
+        </button>
+        <div className="mt-6 pt-6 border-t border-white/10">
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div><Shield className="w-5 h-5 mx-auto text-green-400" /><p className="text-xs text-gray-400 mt-1">Secure</p></div>
+            <div><Zap className="w-5 h-5 mx-auto text-yellow-400" /><p className="text-xs text-gray-400 mt-1">Fast</p></div>
+            <div><Heart className="w-5 h-5 mx-auto text-red-400" /><p className="text-xs text-gray-400 mt-1">Free</p></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1042,25 +976,27 @@ function App() {
     );
   }
 
+  // If not logged in, show auth page
+  if (!user) {
+    return <AuthPage />;
+  }
+
+  // If logged in, show main app
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
-        <Route path="/dashboard" element={user ? <Layout><DashboardPage /></Layout> : <Navigate to="/login" />} />
-        <Route path="/today" element={user ? <Layout><TodayPage /></Layout> : <Navigate to="/login" />} />
-        <Route path="/calendar" element={user ? <Layout><CalendarPage /></Layout> : <Navigate to="/login" />} />
-        <Route path="/tasks" element={user ? <Layout><TasksPage /></Layout> : <Navigate to="/login" />} />
-        <Route path="/habits" element={user ? <Layout><HabitsPage /></Layout> : <Navigate to="/login" />} />
-        <Route path="/diet" element={user ? <Layout><DietPage /></Layout> : <Navigate to="/login" />} />
-        <Route path="/goals" element={user ? <Layout><GoalsPage /></Layout> : <Navigate to="/login" />} />
-        <Route path="/mood" element={user ? <Layout><MoodPage /></Layout> : <Navigate to="/login" />} />
-        <Route path="/sleep" element={user ? <Layout><SleepPage /></Layout> : <Navigate to="/login" />} />
-        <Route path="/exercise" element={user ? <Layout><ExercisePage /></Layout> : <Navigate to="/login" />} />
-        <Route path="/notes" element={user ? <Layout><NotesPage /></Layout> : <Navigate to="/login" />} />
-        <Route path="/weight" element={user ? <Layout><WeightPage /></Layout> : <Navigate to="/login" />} />
-        <Route path="/analytics" element={user ? <Layout><AnalyticsPage /></Layout> : <Navigate to="/login" />} />
-        <Route path="/settings" element={user ? <Layout><SettingsPage /></Layout> : <Navigate to="/login" />} />
-        <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
+        <Route path="/" element={<Layout><DashboardPage /></Layout>} />
+        <Route path="/today" element={<Layout><TodayPage /></Layout>} />
+        <Route path="/tasks" element={<Layout><TasksPage /></Layout>} />
+        <Route path="/habits" element={<Layout><HabitsPage /></Layout>} />
+        <Route path="/diet" element={<Layout><DietPage /></Layout>} />
+        <Route path="/goals" element={<Layout><GoalsPage /></Layout>} />
+        <Route path="/mood" element={<Layout><MoodPage /></Layout>} />
+        <Route path="/sleep" element={<Layout><SleepPage /></Layout>} />
+        <Route path="/exercise" element={<Layout><ExercisePage /></Layout>} />
+        <Route path="/notes" element={<Layout><NotesPage /></Layout>} />
+        <Route path="/weight" element={<Layout><WeightPage /></Layout>} />
+        <Route path="*" element={<Layout><DashboardPage /></Layout>} />
       </Routes>
     </BrowserRouter>
   );
